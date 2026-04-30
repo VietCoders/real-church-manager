@@ -1,5 +1,4 @@
 // PocketBase client wrapper — singleton + auth state restore + retry.
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 import '../../core/logging/logger.dart';
