@@ -11,12 +11,14 @@ class RealCmAuthState {
     required this.isAuthenticated,
     this.user,
     this.role,
+    this.mustChangePassword = false,
   });
 
   final bool hasBackend;
   final bool isAuthenticated;
   final RecordModel? user;
   final String? role;
+  final bool mustChangePassword;
 
   bool get isPriestPastor => role == 'priest_pastor';
   bool get isPriest => role?.startsWith('priest_') ?? false;
@@ -30,12 +32,14 @@ class RealCmAuthState {
     bool? isAuthenticated,
     RecordModel? user,
     String? role,
+    bool? mustChangePassword,
   }) =>
       RealCmAuthState(
         hasBackend: hasBackend ?? this.hasBackend,
         isAuthenticated: isAuthenticated ?? this.isAuthenticated,
         user: user ?? this.user,
         role: role ?? this.role,
+        mustChangePassword: mustChangePassword ?? this.mustChangePassword,
       );
 
   static RealCmAuthState initial() {
@@ -44,11 +48,13 @@ class RealCmAuthState {
       return RealCmAuthState(hasBackend: false, isAuthenticated: false);
     }
     final pb = RealCmPocketBase.instance();
+    final rec = pb.authStore.record;
     return RealCmAuthState(
       hasBackend: true,
       isAuthenticated: pb.authStore.isValid,
-      user: pb.authStore.record,
-      role: pb.authStore.record?.data['role'] as String?,
+      user: rec,
+      role: rec?.data['role'] as String?,
+      mustChangePassword: (rec?.data['must_change_password'] as bool?) ?? false,
     );
   }
 }
