@@ -284,6 +284,18 @@ abstract class AppLocalizations {
   /// **'Đăng nhập'**
   String get authLoginTitle;
 
+  /// No description provided for @authIdentityLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tên đăng nhập'**
+  String get authIdentityLabel;
+
+  /// No description provided for @authIdentityHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'admin'**
+  String get authIdentityHint;
+
   /// No description provided for @authEmailLabel.
   ///
   /// In vi, this message translates to:
@@ -308,6 +320,12 @@ abstract class AppLocalizations {
   /// **'Đăng xuất'**
   String get authLogoutButton;
 
+  /// No description provided for @authIdentityRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập tên đăng nhập'**
+  String get authIdentityRequired;
+
   /// No description provided for @authEmailRequired.
   ///
   /// In vi, this message translates to:
@@ -323,8 +341,104 @@ abstract class AppLocalizations {
   /// No description provided for @authLoginFailed.
   ///
   /// In vi, this message translates to:
-  /// **'Đăng nhập thất bại. Kiểm tra email/mật khẩu.'**
+  /// **'Đăng nhập thất bại. Kiểm tra tên đăng nhập / mật khẩu.'**
   String get authLoginFailed;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi mật khẩu'**
+  String get changePasswordTitle;
+
+  /// No description provided for @changePasswordHeading.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi mật khẩu lần đầu'**
+  String get changePasswordHeading;
+
+  /// No description provided for @changePasswordDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vì bảo mật, vui lòng đổi mật khẩu mặc định trước khi tiếp tục sử dụng.'**
+  String get changePasswordDescription;
+
+  /// No description provided for @changePasswordOldLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu hiện tại'**
+  String get changePasswordOldLabel;
+
+  /// No description provided for @changePasswordNewLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu mới'**
+  String get changePasswordNewLabel;
+
+  /// No description provided for @changePasswordConfirmLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập lại mật khẩu mới'**
+  String get changePasswordConfirmLabel;
+
+  /// No description provided for @changePasswordRules.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tối thiểu 6 ký tự, khác mật khẩu cũ'**
+  String get changePasswordRules;
+
+  /// No description provided for @changePasswordOldRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập mật khẩu hiện tại'**
+  String get changePasswordOldRequired;
+
+  /// No description provided for @changePasswordNewRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập mật khẩu mới'**
+  String get changePasswordNewRequired;
+
+  /// No description provided for @changePasswordConfirmRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập lại mật khẩu mới'**
+  String get changePasswordConfirmRequired;
+
+  /// No description provided for @changePasswordTooShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu quá ngắn (tối thiểu 6 ký tự)'**
+  String get changePasswordTooShort;
+
+  /// No description provided for @changePasswordSameAsOld.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu mới phải khác mật khẩu cũ'**
+  String get changePasswordSameAsOld;
+
+  /// No description provided for @changePasswordConfirmMismatch.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu xác nhận không khớp'**
+  String get changePasswordConfirmMismatch;
+
+  /// No description provided for @changePasswordSubmit.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cập nhật mật khẩu'**
+  String get changePasswordSubmit;
+
+  /// No description provided for @changePasswordSuccess.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi mật khẩu thành công'**
+  String get changePasswordSuccess;
+
+  /// No description provided for @changePasswordFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi mật khẩu thất bại. Kiểm tra mật khẩu hiện tại.'**
+  String get changePasswordFailed;
 
   /// No description provided for @setupTitle.
   ///

@@ -102,6 +102,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get authLoginTitle => 'Đăng nhập';
 
   @override
+  String get authIdentityLabel => 'Tên đăng nhập';
+
+  @override
+  String get authIdentityHint => 'admin';
+
+  @override
   String get authEmailLabel => 'Email';
 
   @override
@@ -114,13 +120,67 @@ class AppLocalizationsVi extends AppLocalizations {
   String get authLogoutButton => 'Đăng xuất';
 
   @override
+  String get authIdentityRequired => 'Vui lòng nhập tên đăng nhập';
+
+  @override
   String get authEmailRequired => 'Vui lòng nhập email';
 
   @override
   String get authPasswordRequired => 'Vui lòng nhập mật khẩu';
 
   @override
-  String get authLoginFailed => 'Đăng nhập thất bại. Kiểm tra email/mật khẩu.';
+  String get authLoginFailed =>
+      'Đăng nhập thất bại. Kiểm tra tên đăng nhập / mật khẩu.';
+
+  @override
+  String get changePasswordTitle => 'Đổi mật khẩu';
+
+  @override
+  String get changePasswordHeading => 'Đổi mật khẩu lần đầu';
+
+  @override
+  String get changePasswordDescription =>
+      'Vì bảo mật, vui lòng đổi mật khẩu mặc định trước khi tiếp tục sử dụng.';
+
+  @override
+  String get changePasswordOldLabel => 'Mật khẩu hiện tại';
+
+  @override
+  String get changePasswordNewLabel => 'Mật khẩu mới';
+
+  @override
+  String get changePasswordConfirmLabel => 'Nhập lại mật khẩu mới';
+
+  @override
+  String get changePasswordRules => 'Tối thiểu 6 ký tự, khác mật khẩu cũ';
+
+  @override
+  String get changePasswordOldRequired => 'Vui lòng nhập mật khẩu hiện tại';
+
+  @override
+  String get changePasswordNewRequired => 'Vui lòng nhập mật khẩu mới';
+
+  @override
+  String get changePasswordConfirmRequired => 'Vui lòng nhập lại mật khẩu mới';
+
+  @override
+  String get changePasswordTooShort => 'Mật khẩu quá ngắn (tối thiểu 6 ký tự)';
+
+  @override
+  String get changePasswordSameAsOld => 'Mật khẩu mới phải khác mật khẩu cũ';
+
+  @override
+  String get changePasswordConfirmMismatch => 'Mật khẩu xác nhận không khớp';
+
+  @override
+  String get changePasswordSubmit => 'Cập nhật mật khẩu';
+
+  @override
+  String get changePasswordSuccess => 'Đổi mật khẩu thành công';
+
+  @override
+  String get changePasswordFailed =>
+      'Đổi mật khẩu thất bại. Kiểm tra mật khẩu hiện tại.';
 
   @override
   String get setupTitle => 'Cấu hình kết nối';

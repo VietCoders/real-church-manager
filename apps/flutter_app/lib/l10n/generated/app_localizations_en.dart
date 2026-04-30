@@ -102,6 +102,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authLoginTitle => 'Sign in';
 
   @override
+  String get authIdentityLabel => 'Username';
+
+  @override
+  String get authIdentityHint => 'admin';
+
+  @override
   String get authEmailLabel => 'Email';
 
   @override
@@ -114,13 +120,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authLogoutButton => 'Sign out';
 
   @override
+  String get authIdentityRequired => 'Username is required';
+
+  @override
   String get authEmailRequired => 'Email is required';
 
   @override
   String get authPasswordRequired => 'Password is required';
 
   @override
-  String get authLoginFailed => 'Login failed. Check email/password.';
+  String get authLoginFailed => 'Login failed. Check username/password.';
+
+  @override
+  String get changePasswordTitle => 'Change password';
+
+  @override
+  String get changePasswordHeading => 'Change password on first login';
+
+  @override
+  String get changePasswordDescription =>
+      'For security, please change the default password before continuing.';
+
+  @override
+  String get changePasswordOldLabel => 'Current password';
+
+  @override
+  String get changePasswordNewLabel => 'New password';
+
+  @override
+  String get changePasswordConfirmLabel => 'Confirm new password';
+
+  @override
+  String get changePasswordRules =>
+      'At least 6 characters, must differ from current password';
+
+  @override
+  String get changePasswordOldRequired => 'Current password required';
+
+  @override
+  String get changePasswordNewRequired => 'New password required';
+
+  @override
+  String get changePasswordConfirmRequired => 'Confirm password required';
+
+  @override
+  String get changePasswordTooShort =>
+      'Password too short (minimum 6 characters)';
+
+  @override
+  String get changePasswordSameAsOld => 'New password must differ from current';
+
+  @override
+  String get changePasswordConfirmMismatch => 'Confirmation does not match';
+
+  @override
+  String get changePasswordSubmit => 'Update password';
+
+  @override
+  String get changePasswordSuccess => 'Password changed successfully';
+
+  @override
+  String get changePasswordFailed => 'Change failed. Check current password.';
 
   @override
   String get setupTitle => 'Connection setup';
