@@ -1,83 +1,27 @@
 /// <reference path="../pb_data/types.d.ts" />
-// Migration init — Real Church Manager v1.0.0
-// Generated từ packages/schema/collections.json (Phase 3)
-// Tạo 16 collections: users (auth), parish_settings, districts, members, families,
-// family_members, sacrament_baptism/confirmation/marriage/anointing/funeral, groups,
-// group_members, mass_intentions, donations, liturgical_events.
+// Real Church Manager — Init migration v1.0.0
+// PB v0.22.21 JSVM. `users` đã có sẵn trong PB → extend bằng custom fields.
+// 15 collections mới: parish_settings, districts, members, families, family_members,
+// 5 sacrament_*, groups, group_members, mass_intentions, donations, liturgical_events.
 
-migrate((app) => {
-  const json = `[
-  {
-    "name": "users",
-    "type": "auth",
-    "system": false,
-    "schema": [
-      {
-        "name": "name",
-        "type": "text",
-        "required": true,
-        "options": {
-          "max": 200
-        }
-      },
-      {
-        "name": "role",
-        "type": "select",
-        "required": true,
-        "options": {
-          "maxSelect": 1,
-          "values": [
-            "priest_pastor",
-            "priest_assistant",
-            "secretary",
-            "council_member",
-            "guest"
-          ]
-        }
-      },
-      {
-        "name": "member_id",
-        "type": "relation",
-        "required": false,
-        "options": {
-          "collectionId": "members",
-          "cascadeDelete": false,
-          "maxSelect": 1
-        }
-      },
-      {
-        "name": "avatar",
-        "type": "file",
-        "required": false,
-        "options": {
-          "maxSize": 5242880,
-          "mimeTypes": [
-            "image/jpeg",
-            "image/png",
-            "image/webp"
-          ],
-          "maxSelect": 1
-        }
-      }
-    ],
-    "indexes": [],
-    "listRule": "@request.auth.role = \\"priest_pastor\\"",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role = \\"priest_pastor\\"",
-    "updateRule": "@request.auth.id = id || @request.auth.role = \\"priest_pastor\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\"",
-    "options": {
-      "allowEmailAuth": true,
-      "allowOAuth2Auth": false,
-      "allowUsernameAuth": false,
-      "exceptEmailDomains": null,
-      "manageRule": null,
-      "minPasswordLength": 8,
-      "onlyEmailDomains": null,
-      "requireEmail": true
-    }
-  },
-  {
+migrate((db) => {
+  const dao = new Dao(db);
+
+  // Extend default users auth collection với role/member_id/name/avatar.
+  const usersCol = dao.findCollectionByNameOrId('users');
+  usersCol.schema.addField(new SchemaField({"name":"name","type":"text","required":true,"options":{"max":200}}));
+  usersCol.schema.addField(new SchemaField({"name":"role","type":"select","required":true,"options":{"maxSelect":1,"values":["priest_pastor","priest_assistant","secretary","council_member","guest"]}}));
+  usersCol.schema.addField(new SchemaField({"name":"member_id","type":"relation","required":false,"options":{"collectionId":"rcm_members0000","cascadeDelete":false,"maxSelect":1}}));
+  usersCol.schema.addField(new SchemaField({"name":"avatar","type":"file","required":false,"options":{"maxSize":5242880,"mimeTypes":["image/jpeg","image/png","image/webp"],"maxSelect":1}}));
+  usersCol.listRule = "@request.auth.role = \"priest_pastor\"";
+  usersCol.viewRule = "@request.auth.id != \"\"";
+  usersCol.createRule = "@request.auth.role = \"priest_pastor\"";
+  usersCol.updateRule = "@request.auth.id = id || @request.auth.role = \"priest_pastor\"";
+  usersCol.deleteRule = "@request.auth.role = \"priest_pastor\"";
+  dao.saveCollection(usersCol);
+
+  // parish_settings
+  dao.saveCollection(new Collection({
     "name": "parish_settings",
     "type": "base",
     "schema": [
@@ -171,13 +115,16 @@ migrate((app) => {
       }
     ],
     "indexes": [],
-    "listRule": "@request.auth.id != \\"\\"",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role = \\"priest_pastor\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role = \"priest_pastor\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\"",
+    "deleteRule": "@request.auth.role = \"priest_pastor\"",
+    "id": "rcm_parishsetti"
+  }));
+
+  // districts
+  dao.saveCollection(new Collection({
     "name": "districts",
     "type": "base",
     "schema": [
@@ -201,7 +148,7 @@ migrate((app) => {
         "name": "head_member_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -225,13 +172,16 @@ migrate((app) => {
     "indexes": [
       "CREATE UNIQUE INDEX idx_districts_code ON districts (code) WHERE code != ''"
     ],
-    "listRule": "@request.auth.id != \\"\\" && deleted_at = null",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\" && deleted_at = null",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "deleteRule": "@request.auth.role = \"priest_pastor\"",
+    "id": "rcm_districts00"
+  }));
+
+  // members
+  dao.saveCollection(new Collection({
     "name": "members",
     "type": "base",
     "schema": [
@@ -281,7 +231,7 @@ migrate((app) => {
         "name": "district_id",
         "type": "relation",
         "options": {
-          "collectionId": "districts",
+          "collectionId": "rcm_districts00",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -290,7 +240,7 @@ migrate((app) => {
         "name": "family_id",
         "type": "relation",
         "options": {
-          "collectionId": "families",
+          "collectionId": "rcm_families000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -299,7 +249,7 @@ migrate((app) => {
         "name": "father_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -308,7 +258,7 @@ migrate((app) => {
         "name": "mother_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -331,7 +281,7 @@ migrate((app) => {
         "name": "spouse_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -382,7 +332,7 @@ migrate((app) => {
         "name": "baptism_id",
         "type": "relation",
         "options": {
-          "collectionId": "sacrament_baptism",
+          "collectionId": "rcm_sacramentba",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -395,7 +345,7 @@ migrate((app) => {
         "name": "confirmation_id",
         "type": "relation",
         "options": {
-          "collectionId": "sacrament_confirmation",
+          "collectionId": "rcm_sacramentco",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -408,7 +358,7 @@ migrate((app) => {
         "name": "marriage_id",
         "type": "relation",
         "options": {
-          "collectionId": "sacrament_marriage",
+          "collectionId": "rcm_sacramentma",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -417,7 +367,7 @@ migrate((app) => {
         "name": "funeral_id",
         "type": "relation",
         "options": {
-          "collectionId": "sacrament_funeral",
+          "collectionId": "rcm_sacramentfu",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -455,13 +405,16 @@ migrate((app) => {
       "CREATE INDEX idx_members_family ON members (family_id)",
       "CREATE INDEX idx_members_status ON members (status)"
     ],
-    "listRule": "@request.auth.id != \\"\\" && deleted_at = null",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\" && deleted_at = null",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "deleteRule": "@request.auth.role = \"priest_pastor\"",
+    "id": "rcm_members0000"
+  }));
+
+  // families
+  dao.saveCollection(new Collection({
     "name": "families",
     "type": "base",
     "schema": [
@@ -477,7 +430,7 @@ migrate((app) => {
         "type": "relation",
         "required": true,
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -486,7 +439,7 @@ migrate((app) => {
         "name": "district_id",
         "type": "relation",
         "options": {
-          "collectionId": "districts",
+          "collectionId": "rcm_districts00",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -518,13 +471,16 @@ migrate((app) => {
       "CREATE INDEX idx_families_district ON families (district_id)",
       "CREATE INDEX idx_families_head ON families (head_id)"
     ],
-    "listRule": "@request.auth.id != \\"\\" && deleted_at = null",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\" && deleted_at = null",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "deleteRule": "@request.auth.role = \"priest_pastor\"",
+    "id": "rcm_families000"
+  }));
+
+  // family_members
+  dao.saveCollection(new Collection({
     "name": "family_members",
     "type": "base",
     "schema": [
@@ -533,7 +489,7 @@ migrate((app) => {
         "type": "relation",
         "required": true,
         "options": {
-          "collectionId": "families",
+          "collectionId": "rcm_families000",
           "cascadeDelete": true,
           "maxSelect": 1
         }
@@ -543,7 +499,7 @@ migrate((app) => {
         "type": "relation",
         "required": true,
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": true,
           "maxSelect": 1
         }
@@ -576,13 +532,16 @@ migrate((app) => {
     "indexes": [
       "CREATE UNIQUE INDEX idx_family_member_pair ON family_members (family_id, member_id)"
     ],
-    "listRule": "@request.auth.id != \\"\\"",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "deleteRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "deleteRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "id": "rcm_familymembe"
+  }));
+
+  // sacrament_baptism
+  dao.saveCollection(new Collection({
     "name": "sacrament_baptism",
     "type": "base",
     "schema": [
@@ -598,7 +557,7 @@ migrate((app) => {
         "type": "relation",
         "required": true,
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -641,7 +600,7 @@ migrate((app) => {
         "name": "godfather_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -650,7 +609,7 @@ migrate((app) => {
         "name": "godmother_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -687,13 +646,16 @@ migrate((app) => {
       "CREATE INDEX idx_baptism_member ON sacrament_baptism (member_id)",
       "CREATE INDEX idx_baptism_date ON sacrament_baptism (baptism_date)"
     ],
-    "listRule": "@request.auth.id != \\"\\"",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "deleteRule": "@request.auth.role = \"priest_pastor\"",
+    "id": "rcm_sacramentba"
+  }));
+
+  // sacrament_confirmation
+  dao.saveCollection(new Collection({
     "name": "sacrament_confirmation",
     "type": "base",
     "schema": [
@@ -709,7 +671,7 @@ migrate((app) => {
         "type": "relation",
         "required": true,
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -752,7 +714,7 @@ migrate((app) => {
         "name": "sponsor_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -774,13 +736,16 @@ migrate((app) => {
       "CREATE UNIQUE INDEX idx_confirmation_book_number ON sacrament_confirmation (book_number) WHERE book_number != ''",
       "CREATE INDEX idx_confirmation_member ON sacrament_confirmation (member_id)"
     ],
-    "listRule": "@request.auth.id != \\"\\"",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "deleteRule": "@request.auth.role = \"priest_pastor\"",
+    "id": "rcm_sacramentco"
+  }));
+
+  // sacrament_marriage
+  dao.saveCollection(new Collection({
     "name": "sacrament_marriage",
     "type": "base",
     "schema": [
@@ -796,7 +761,7 @@ migrate((app) => {
         "type": "relation",
         "required": true,
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -806,7 +771,7 @@ migrate((app) => {
         "type": "relation",
         "required": true,
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -879,7 +844,7 @@ migrate((app) => {
         "name": "witness_1_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -888,7 +853,7 @@ migrate((app) => {
         "name": "witness_2_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -918,13 +883,16 @@ migrate((app) => {
       "CREATE INDEX idx_marriage_groom ON sacrament_marriage (groom_id)",
       "CREATE INDEX idx_marriage_bride ON sacrament_marriage (bride_id)"
     ],
-    "listRule": "@request.auth.id != \\"\\"",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "deleteRule": "@request.auth.role = \"priest_pastor\"",
+    "id": "rcm_sacramentma"
+  }));
+
+  // sacrament_anointing
+  dao.saveCollection(new Collection({
     "name": "sacrament_anointing",
     "type": "base",
     "schema": [
@@ -933,7 +901,7 @@ migrate((app) => {
         "type": "relation",
         "required": true,
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -974,13 +942,16 @@ migrate((app) => {
       "CREATE INDEX idx_anointing_member ON sacrament_anointing (member_id)",
       "CREATE INDEX idx_anointing_date ON sacrament_anointing (anointing_date)"
     ],
-    "listRule": "@request.auth.id != \\"\\"",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role ?~ \"priest_\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\"",
+    "deleteRule": "@request.auth.role = \"priest_pastor\"",
+    "id": "rcm_sacramentan"
+  }));
+
+  // sacrament_funeral
+  dao.saveCollection(new Collection({
     "name": "sacrament_funeral",
     "type": "base",
     "schema": [
@@ -996,7 +967,7 @@ migrate((app) => {
         "type": "relation",
         "required": true,
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -1050,13 +1021,16 @@ migrate((app) => {
       "CREATE UNIQUE INDEX idx_funeral_book_number ON sacrament_funeral (book_number) WHERE book_number != ''",
       "CREATE INDEX idx_funeral_member ON sacrament_funeral (member_id)"
     ],
-    "listRule": "@request.auth.id != \\"\\"",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "deleteRule": "@request.auth.role = \"priest_pastor\"",
+    "id": "rcm_sacramentfu"
+  }));
+
+  // groups
+  dao.saveCollection(new Collection({
     "name": "groups",
     "type": "base",
     "schema": [
@@ -1095,7 +1069,7 @@ migrate((app) => {
         "name": "head_member_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -1104,7 +1078,7 @@ migrate((app) => {
         "name": "vice_head_member_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -1133,13 +1107,16 @@ migrate((app) => {
       "CREATE UNIQUE INDEX idx_groups_code ON groups (code) WHERE code != ''",
       "CREATE INDEX idx_groups_type ON groups (type)"
     ],
-    "listRule": "@request.auth.id != \\"\\" && deleted_at = null",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\" || @request.auth.role = \\"council_member\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\" && deleted_at = null",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\" || @request.auth.role = \"council_member\"",
+    "deleteRule": "@request.auth.role = \"priest_pastor\"",
+    "id": "rcm_groups00000"
+  }));
+
+  // group_members
+  dao.saveCollection(new Collection({
     "name": "group_members",
     "type": "base",
     "schema": [
@@ -1148,7 +1125,7 @@ migrate((app) => {
         "type": "relation",
         "required": true,
         "options": {
-          "collectionId": "groups",
+          "collectionId": "rcm_groups00000",
           "cascadeDelete": true,
           "maxSelect": 1
         }
@@ -1158,7 +1135,7 @@ migrate((app) => {
         "type": "relation",
         "required": true,
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": true,
           "maxSelect": 1
         }
@@ -1197,13 +1174,16 @@ migrate((app) => {
     "indexes": [
       "CREATE UNIQUE INDEX idx_group_member_pair ON group_members (group_id, member_id) WHERE left_date = null"
     ],
-    "listRule": "@request.auth.id != \\"\\"",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\" || @request.auth.role = \\"council_member\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\" || @request.auth.role = \\"council_member\\"",
-    "deleteRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\" || @request.auth.role = \"council_member\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\" || @request.auth.role = \"council_member\"",
+    "deleteRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "id": "rcm_groupmember"
+  }));
+
+  // mass_intentions
+  dao.saveCollection(new Collection({
     "name": "mass_intentions",
     "type": "base",
     "schema": [
@@ -1227,7 +1207,7 @@ migrate((app) => {
         "name": "requester_member_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -1240,7 +1220,7 @@ migrate((app) => {
         "name": "priest_id",
         "type": "relation",
         "options": {
-          "collectionId": "users",
+          "collectionId": "_pb_users_auth_",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -1276,13 +1256,16 @@ migrate((app) => {
       "CREATE INDEX idx_mass_intention_date ON mass_intentions (mass_date)",
       "CREATE INDEX idx_mass_intention_status ON mass_intentions (status)"
     ],
-    "listRule": "@request.auth.id != \\"\\"",
-    "viewRule": "@request.auth.id != \\"\\"",
-    "createRule": "@request.auth.id != \\"\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "deleteRule": "@request.auth.role ?~ \\"priest_\\""
-  },
-  {
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "deleteRule": "@request.auth.role ?~ \"priest_\"",
+    "id": "rcm_massintenti"
+  }));
+
+  // donations
+  dao.saveCollection(new Collection({
     "name": "donations",
     "type": "base",
     "schema": [
@@ -1331,7 +1314,7 @@ migrate((app) => {
         "name": "donor_member_id",
         "type": "relation",
         "options": {
-          "collectionId": "members",
+          "collectionId": "rcm_members0000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -1340,7 +1323,7 @@ migrate((app) => {
         "name": "family_id",
         "type": "relation",
         "options": {
-          "collectionId": "families",
+          "collectionId": "rcm_families000",
           "cascadeDelete": false,
           "maxSelect": 1
         }
@@ -1369,13 +1352,16 @@ migrate((app) => {
       "CREATE INDEX idx_donations_type ON donations (type)",
       "CREATE UNIQUE INDEX idx_donations_receipt ON donations (receipt_no) WHERE receipt_no != ''"
     ],
-    "listRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\" || @request.auth.role = \\"council_member\\"",
-    "viewRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\" || @request.auth.role = \\"council_member\\"",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "deleteRule": "@request.auth.role = \\"priest_pastor\\""
-  },
-  {
+    "listRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\" || @request.auth.role = \"council_member\"",
+    "viewRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\" || @request.auth.role = \"council_member\"",
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "deleteRule": "@request.auth.role = \"priest_pastor\"",
+    "id": "rcm_donations00"
+  }));
+
+  // liturgical_events
+  dao.saveCollection(new Collection({
     "name": "liturgical_events",
     "type": "base",
     "schema": [
@@ -1455,22 +1441,29 @@ migrate((app) => {
       "CREATE INDEX idx_liturgical_date ON liturgical_events (event_date)",
       "CREATE INDEX idx_liturgical_type ON liturgical_events (event_type)"
     ],
-    "listRule": "@request.auth.id != \\"\\"",
+    "listRule": "@request.auth.id != \"\"",
     "viewRule": "",
-    "createRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "updateRule": "@request.auth.role ?~ \\"priest_\\" || @request.auth.role = \\"secretary\\"",
-    "deleteRule": "@request.auth.role ?~ \\"priest_\\""
-  }
-]`;
-  return app.importCollectionsByMarshaledJSON(json, false);
-}, (app) => {
-  const names = ["liturgical_events","donations","mass_intentions","group_members","groups","sacrament_funeral","sacrament_anointing","sacrament_marriage","sacrament_confirmation","sacrament_baptism","family_members","families","members","districts","parish_settings","users"];
-  for (const name of names) {
-    try {
-      const c = app.findCollectionByNameOrId(name);
-      app.delete(c);
-    } catch (e) {
-      // collection không tồn tại, bỏ qua
-    }
-  }
+    "createRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "updateRule": "@request.auth.role ?~ \"priest_\" || @request.auth.role = \"secretary\"",
+    "deleteRule": "@request.auth.role ?~ \"priest_\"",
+    "id": "rcm_liturgicale"
+  }));
+}, (db) => {
+  const dao = new Dao(db);
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("liturgical_events")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("donations")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("mass_intentions")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("group_members")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("groups")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("sacrament_funeral")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("sacrament_anointing")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("sacrament_marriage")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("sacrament_confirmation")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("sacrament_baptism")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("family_members")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("families")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("members")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("districts")); } catch (e) {}
+  try { dao.deleteCollection(dao.findCollectionByNameOrId("parish_settings")); } catch (e) {}
+  // Note: KHÔNG xoá default users collection.
 });
