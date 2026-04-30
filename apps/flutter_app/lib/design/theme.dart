@@ -39,7 +39,7 @@ class RealCmTheme {
       useMaterial3: true,
       colorScheme: scheme,
       brightness: brightness,
-      fontFamily: 'Inter',
+      // fontFamily: 'Inter',  // bật khi self-host Inter font (ui-rules §3.2)
       scaffoldBackgroundColor: scheme.surface,
 
       textTheme: TextTheme(
