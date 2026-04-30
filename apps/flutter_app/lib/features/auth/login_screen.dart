@@ -17,14 +17,14 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController();
+  final _identityCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   bool _obscure = true;
   bool _loading = false;
 
   @override
   void dispose() {
-    _emailCtrl.dispose();
+    _identityCtrl.dispose();
     _passwordCtrl.dispose();
     super.dispose();
   }
@@ -34,7 +34,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _loading = true);
     try {
       await ref.read(realCmAuthProvider.notifier).login(
-            email: _emailCtrl.text.trim(),
+            identity: _identityCtrl.text.trim(),
             password: _passwordCtrl.text,
           );
     } catch (e) {
