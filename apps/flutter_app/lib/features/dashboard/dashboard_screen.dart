@@ -1,8 +1,7 @@
-// Dashboard screen — grid 12-col responsive với widget tự sắp xếp + bật/tắt.
-// Sau login, đây là màn hình mặc định. Drag-drop reorder qua reorderable_grid_view.
+// Dashboard screen — view mode. Layout responsive Wrap với widget kích thước thực tế.
+// Drag-drop reorder + bật/tắt visibility nằm ở Customize screen riêng (cleaner UX).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
 import '../../data/dashboard/repository.dart';
 import '../../design/icons.dart';
@@ -25,34 +24,29 @@ final dashboardLayoutProvider =
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
-  static const double _gridGap = RealCmSpacing.s3;
-
-  /// Số cột thực tế tuỳ kích thước màn hình (responsive).
-  int _gridCols(double width) {
-    if (width >= 1400) return 12;
-    if (width >= 1000) return 8;
-    if (width >= 700) return 6;
-    if (width >= 480) return 4;
-    return 2;
-  }
-
-  /// Kích thước widget chiếm bao nhiêu cell trên grid hiện tại.
-  int _widgetCols(DashboardWidgetSize size, int totalCols) {
-    final ratio = size.cols / 12;
-    final c = (totalCols * ratio).round();
-    return c.clamp(1, totalCols);
-  }
-
-  double _widgetHeight(DashboardWidgetSize size) {
+  static double _widthFor(DashboardWidgetSize size, double available) {
     switch (size) {
       case DashboardWidgetSize.sm:
-        return 160;
+        return 240.0.clamp(160.0, available);
       case DashboardWidgetSize.md:
-        return 280;
+        return 380.0.clamp(280.0, available);
       case DashboardWidgetSize.lg:
-        return 320;
+        return 580.0.clamp(280.0, available);
       case DashboardWidgetSize.xl:
-        return 360;
+        return available;
+    }
+  }
+
+  static double _heightFor(DashboardWidgetSize size) {
+    switch (size) {
+      case DashboardWidgetSize.sm:
+        return 140.0;
+      case DashboardWidgetSize.md:
+        return 320.0;
+      case DashboardWidgetSize.lg:
+        return 360.0;
+      case DashboardWidgetSize.xl:
+        return 400.0;
     }
   }
 
@@ -85,6 +79,7 @@ class DashboardScreen extends ConsumerWidget {
             tooltip: 'Đăng xuất',
             onPressed: () => realCmLogoutWithConfirm(context, ref),
           ),
+          const SizedBox(width: RealCmSpacing.s2),
         ],
       ),
       drawer: _DashboardDrawer(role: auth.role ?? 'guest'),
@@ -107,90 +102,74 @@ class DashboardScreen extends ConsumerWidget {
           final visible = specs.where((s) => s.enabled).toList()
             ..sort((a, b) => a.order.compareTo(b.order));
           if (visible.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(RealCmSpacing.s6),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(RealCmIcons.report, size: 56, color: RealCmColors.textDisabled),
-                    const SizedBox(height: RealCmSpacing.s3),
-                    const Text('Chưa có widget nào hiển thị',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: RealCmSpacing.s2),
-                    const Text('Vào "Tuỳ chỉnh" để bật widget bạn muốn xem.',
-                        style: TextStyle(color: RealCmColors.textMuted)),
-                    const SizedBox(height: RealCmSpacing.s4),
-                    ElevatedButton.icon(
-                      icon: const Icon(RealCmIcons.settings),
-                      label: const Text('Tuỳ chỉnh dashboard'),
-                      onPressed: () async {
-                        await Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => const DashboardCustomizeScreen(),
-                        ));
-                        ref.invalidate(dashboardLayoutProvider);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            );
+            return _EmptyDashboardCta(onCustomize: () async {
+              await Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const DashboardCustomizeScreen(),
+              ));
+              ref.invalidate(dashboardLayoutProvider);
+            });
           }
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final totalCols = _gridCols(constraints.maxWidth);
-              final cellW = (constraints.maxWidth - (RealCmSpacing.s4 * 2) - _gridGap * (totalCols - 1)) / totalCols;
-              return Padding(
-                padding: const EdgeInsets.all(RealCmSpacing.s4),
-                child: ReorderableGridView.builder(
-                  itemCount: visible.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: totalCols,
-                    mainAxisSpacing: _gridGap,
-                    crossAxisSpacing: _gridGap,
-                    childAspectRatio: 1.5,
-                  ),
-                  onReorder: (oldIdx, newIdx) async {
-                    final reordered = [...visible];
-                    final item = reordered.removeAt(oldIdx);
-                    reordered.insert(newIdx, item);
-                    // Combine với hidden widgets giữ nguyên order tương đối.
-                    final hidden = specs.where((s) => !s.enabled).toList();
-                    final newList = <DashboardWidgetSpec>[];
-                    for (var i = 0; i < reordered.length; i++) {
-                      newList.add(reordered[i].copyWith(order: i));
-                    }
-                    for (var i = 0; i < hidden.length; i++) {
-                      newList.add(hidden[i].copyWith(order: reordered.length + i));
-                    }
-                    try {
-                      await ref.read(dashboardRepoProvider).save(DashboardLayout(widgets: newList));
-                      ref.invalidate(dashboardLayoutProvider);
-                    } catch (e) {
-                      if (context.mounted) {
-                        realCmToast(context, 'Lưu vị trí thất bại: $e', type: RealCmToastType.error);
-                      }
-                    }
-                  },
-                  itemBuilder: (ctx, i) {
-                    final spec = visible[i];
-                    final meta = DashboardWidgetRegistry.meta(spec.type);
-                    final cols = _widgetCols(spec.size, totalCols);
-                    final widgetW = cellW * cols + _gridGap * (cols - 1);
-                    return Container(
-                      key: ValueKey(spec.type),
-                      width: widgetW,
-                      height: _widgetHeight(spec.size),
-                      child: meta == null
-                          ? _UnknownWidget(type: spec.type)
-                          : meta.builder(ref, spec),
-                    );
-                  },
-                ),
-              );
-            },
+          return RefreshIndicator(
+            onRefresh: () async => ref.invalidate(dashboardLayoutProvider),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(RealCmSpacing.s4),
+              child: LayoutBuilder(
+                builder: (ctx, constraints) {
+                  final available = constraints.maxWidth;
+                  return Wrap(
+                    spacing: RealCmSpacing.s3,
+                    runSpacing: RealCmSpacing.s3,
+                    children: visible.map((spec) {
+                      final meta = DashboardWidgetRegistry.meta(spec.type);
+                      final w = _widthFor(spec.size, available);
+                      final h = _heightFor(spec.size);
+                      return SizedBox(
+                        width: w,
+                        height: h,
+                        child: meta == null
+                            ? _UnknownWidget(type: spec.type)
+                            : meta.builder(ref, spec),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _EmptyDashboardCta extends StatelessWidget {
+  const _EmptyDashboardCta({required this.onCustomize});
+  final VoidCallback onCustomize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(RealCmSpacing.s6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(RealCmIcons.report, size: 56, color: RealCmColors.textDisabled),
+            const SizedBox(height: RealCmSpacing.s3),
+            const Text('Chưa có widget nào hiển thị',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: RealCmSpacing.s2),
+            const Text('Vào "Tuỳ chỉnh" để bật widget bạn muốn xem.',
+                style: TextStyle(color: RealCmColors.textMuted)),
+            const SizedBox(height: RealCmSpacing.s4),
+            ElevatedButton.icon(
+              icon: const Icon(RealCmIcons.settings),
+              label: const Text('Tuỳ chỉnh dashboard'),
+              onPressed: onCustomize,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -209,7 +188,8 @@ class _UnknownWidget extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(RealCmSpacing.s4),
       child: Center(
-        child: Text('Widget không xác định: $type', style: const TextStyle(color: RealCmColors.textMuted)),
+        child: Text('Widget không xác định: $type',
+            style: const TextStyle(color: RealCmColors.textMuted)),
       ),
     );
   }
