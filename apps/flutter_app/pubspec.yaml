@@ -1,0 +1,90 @@
+name: real_church_manager
+description: "Phần mềm quản lý giáo xứ Công giáo VN, đa nền tảng (Windows + macOS + Android + Linux), đồng bộ thời gian thực, mã nguồn mở MIT."
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Navigation
+  go_router: ^14.2.7
+
+  # Backend
+  pocketbase: ^0.20.0
+
+  # Offline cache
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # i18n
+  intl: ^0.19.0
+
+  # PDF (in chứng chỉ Bí Tích)
+  pdf: ^3.10.8
+  printing: ^5.13.4
+
+  # File picker (import Excel/CSV, ảnh giáo dân)
+  file_picker: ^8.1.2
+  image_picker: ^1.1.2
+
+  # Utility
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  equatable: ^2.0.7
+  collection: ^1.18.0
+
+  # Logging
+  logging: ^1.2.0
+
+  # Date utilities
+  rrule: ^0.2.16     # cho liturgical_events.recurrence_rule
+
+  # Path
+  path: ^1.9.0
+  path_provider: ^2.1.4
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+  # Codegen
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  riverpod_generator: ^2.4.3
+  hive_generator: ^2.0.1
+
+flutter:
+  uses-material-design: true
+  generate: true   # bật flutter_localizations gen-l10n
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/fonts/
+
+  # Fonts
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter/Inter-Regular.ttf
+        - asset: assets/fonts/Inter/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter/Inter-Bold.ttf
+          weight: 700
