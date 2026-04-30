@@ -33,6 +33,12 @@ dependencies:
   pdf: ^3.10.8
   printing: ^5.13.4
 
+  # Charts (dashboard)
+  fl_chart: ^0.69.0
+
+  # Drag-drop reorder cho dashboard
+  reorderable_grid_view: ^2.2.8
+
   # File picker (import Excel/CSV, ảnh giáo dân)
   file_picker: ^8.1.2
   image_picker: ^1.1.2
