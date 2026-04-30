@@ -1,16 +1,21 @@
 /// <reference path="../pb_data/types.d.ts" />
 // Real Church Manager — Init migration v1.0.0
-// PB v0.22.21 JSVM. `users` đã có sẵn trong PB → extend bằng custom fields.
-// 15 collections mới: parish_settings, districts, members, families, family_members,
-// 5 sacrament_*, groups, group_members, mass_intentions, donations, liturgical_events.
+// PB v0.22.21 JSVM. Extend default users + create 15 collections mới.
 
 migrate((db) => {
   const dao = new Dao(db);
 
-  // Extend default users auth collection với role/member_id/name/avatar.
   const usersCol = dao.findCollectionByNameOrId('users');
   usersCol.schema.addField(new SchemaField({"name":"role","type":"select","required":true,"options":{"maxSelect":1,"values":["priest_pastor","priest_assistant","secretary","council_member","guest"]}}));
   usersCol.schema.addField(new SchemaField({"name":"member_id","type":"relation","required":false,"options":{"collectionId":"rcm_members0000","cascadeDelete":false,"maxSelect":1}}));
+  usersCol.schema.addField(new SchemaField({"name":"must_change_password","type":"bool","required":false,"options":{}}));
+  // Auth options (cho phép login bằng username thay vì email)
+  const usersOpts = usersCol.options;
+  usersOpts.allowUsernameAuth = true;
+  usersOpts.allowEmailAuth = true;
+  usersOpts.requireEmail = false;
+  usersOpts.minPasswordLength = 6;
+  usersCol.options = usersOpts;
   usersCol.listRule = "@request.auth.role = \"priest_pastor\"";
   usersCol.viewRule = "@request.auth.id != \"\"";
   usersCol.createRule = "@request.auth.role = \"priest_pastor\"";
@@ -1463,5 +1468,4 @@ migrate((db) => {
   try { dao.deleteCollection(dao.findCollectionByNameOrId("members")); } catch (e) {}
   try { dao.deleteCollection(dao.findCollectionByNameOrId("districts")); } catch (e) {}
   try { dao.deleteCollection(dao.findCollectionByNameOrId("parish_settings")); } catch (e) {}
-  // Note: KHÔNG xoá default users collection.
 });

@@ -39,12 +39,12 @@
       "options": {
         "allowEmailAuth": true,
         "allowOAuth2Auth": false,
-        "allowUsernameAuth": false,
+        "allowUsernameAuth": true,
         "exceptEmailDomains": null,
         "manageRule": null,
-        "minPasswordLength": 8,
+        "minPasswordLength": 6,
         "onlyEmailDomains": null,
-        "requireEmail": true
+        "requireEmail": false
       }
     },
     {
