@@ -9,6 +9,8 @@ migrate((db) => {
   usersCol.schema.addField(new SchemaField({"name":"role","type":"select","required":true,"options":{"maxSelect":1,"values":["priest_pastor","priest_assistant","secretary","council_member","guest"]}}));
   usersCol.schema.addField(new SchemaField({"name":"member_id","type":"relation","required":false,"options":{"collectionId":"rcm_members0000","cascadeDelete":false,"maxSelect":1}}));
   usersCol.schema.addField(new SchemaField({"name":"must_change_password","type":"bool","required":false,"options":{}}));
+  usersCol.schema.addField(new SchemaField({"name":"dashboard_layout","type":"json","required":false,"options":{"maxSize":32768}}));
+  usersCol.schema.addField(new SchemaField({"name":"preferred_language","type":"select","required":false,"options":{"maxSelect":1,"values":["vi","en"]}}));
   // Auth options (cho phép login bằng username thay vì email)
   const usersOpts = usersCol.options;
   usersOpts.allowUsernameAuth = true;

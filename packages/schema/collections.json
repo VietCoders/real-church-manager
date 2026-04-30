@@ -28,6 +28,18 @@
           "type": "bool",
           "required": false,
           "options": {}
+        },
+        {
+          "name": "dashboard_layout",
+          "type": "json",
+          "required": false,
+          "options": {"maxSize": 32768}
+        },
+        {
+          "name": "preferred_language",
+          "type": "select",
+          "required": false,
+          "options": {"maxSelect": 1, "values": ["vi", "en"]}
         }
       ],
       "indexes": [],
