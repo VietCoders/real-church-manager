@@ -70,14 +70,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       style: Theme.of(context).textTheme.bodyMedium),
                   const SizedBox(height: RealCmSpacing.s6),
                   TextFormField(
-                    controller: _emailCtrl,
-                    keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
+                    controller: _identityCtrl,
+                    keyboardType: TextInputType.text,
+                    autofillHints: const [AutofillHints.username],
+                    autocorrect: false,
                     decoration: InputDecoration(
-                      labelText: t.authEmailLabel,
+                      labelText: t.authIdentityLabel,
+                      hintText: t.authIdentityHint,
                       prefixIcon: const Icon(RealCmIcons.user),
                     ),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? t.authEmailRequired : null,
+                    validator: (v) => (v == null || v.trim().isEmpty) ? t.authIdentityRequired : null,
                   ),
                   const SizedBox(height: RealCmSpacing.s3),
                   TextFormField(
