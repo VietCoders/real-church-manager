@@ -1,20 +1,21 @@
-// Member list — danh sách giáo dân + search + nav drawer.
+// Member list — full CRUD: search + add (modal) + edit (modal) + soft delete (confirm).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../data/member/repository.dart';
 import '../../design/icons.dart';
 import '../../design/tokens.dart';
 import '../../domain/member/entity.dart';
-import '../../l10n/generated/app_localizations.dart';
 import '../../platform/pocketbase/auth.dart';
+import '../../ui/modal/service.dart';
+import '../../ui/scaffold/app_shell.dart';
 import '../../ui/toast/service.dart';
+import 'member_form.dart';
 
-final _memberRepoProvider = Provider<MemberRepository>((ref) => MemberRepository());
-
-final _memberListProvider = FutureProvider.autoDispose.family<List<Member>, String?>((ref, search) {
-  return ref.read(_memberRepoProvider).list(search: search);
-});
+final _memberListProvider = FutureProvider.autoDispose.family<List<Member>, String?>(
+  (ref, search) => ref.read(memberRepoProvider).list(search: search),
+);
 
 class MemberListScreen extends ConsumerStatefulWidget {
   const MemberListScreen({super.key});
@@ -25,96 +26,169 @@ class MemberListScreen extends ConsumerStatefulWidget {
 
 class _MemberListScreenState extends ConsumerState<MemberListScreen> {
   String _search = '';
+  final _searchCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _addNew() async {
+    final result = await showMemberFormModal(context, ref);
+    if (result != null) {
+      ref.invalidate(_memberListProvider);
+    }
+  }
+
+  Future<void> _edit(Member m) async {
+    final result = await showMemberFormModal(context, ref, existing: m);
+    if (result != null) {
+      ref.invalidate(_memberListProvider);
+    }
+  }
+
+  Future<void> _delete(Member m) async {
+    final ok = await realCmConfirm(
+      context,
+      title: 'Xoá giáo dân',
+      body: 'Bạn có chắc muốn xoá giáo dân "${m.displayName}"?\n\nLưu ý: dữ liệu sẽ ẩn khỏi danh sách nhưng vẫn giữ trong sổ Bí Tích để bảo toàn lịch sử.',
+      confirmLabel: 'Xoá',
+      danger: true,
+    );
+    if (!ok) return;
+    try {
+      await ref.read(memberRepoProvider).softDelete(m.id);
+      if (mounted) {
+        realCmToast(context, 'Đã xoá ${m.displayName}', type: RealCmToastType.success);
+        ref.invalidate(_memberListProvider);
+      }
+    } catch (e) {
+      if (mounted) realCmToast(context, 'Xoá thất bại: $e', type: RealCmToastType.error);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
     final auth = ref.watch(realCmAuthProvider);
+    final canEdit = auth.canEditMembers;
     final asyncList = ref.watch(_memberListProvider(_search.isEmpty ? null : _search));
+    final df = DateFormat('dd/MM/yyyy', 'vi');
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(t.memberListTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(RealCmIcons.refresh),
-            onPressed: () => ref.invalidate(_memberListProvider),
-          ),
-          IconButton(
-            icon: const Icon(RealCmIcons.logout),
-            tooltip: t.authLogoutButton,
-            onPressed: () async {
-              await ref.read(realCmAuthProvider.notifier).logout();
-            },
-          ),
-        ],
-      ),
-      drawer: _NavDrawer(role: auth.role ?? 'guest'),
+    return RealCmAppShell(
+      title: 'Danh sách giáo dân',
+      actions: [
+        IconButton(
+          icon: const Icon(RealCmIcons.refresh),
+          tooltip: 'Làm mới',
+          onPressed: () => ref.invalidate(_memberListProvider),
+        ),
+      ],
+      floatingActionButton: canEdit
+          ? FloatingActionButton.extended(
+              onPressed: _addNew,
+              icon: const Icon(RealCmIcons.add),
+              label: const Text('Thêm giáo dân'),
+            )
+          : null,
       body: Column(
         children: [
-          Padding(
+          Container(
             padding: const EdgeInsets.all(RealCmSpacing.s4),
-            child: TextField(
-              decoration: InputDecoration(
-                prefixIcon: const Icon(RealCmIcons.search),
-                hintText: t.memberSearchHint,
-              ),
-              onChanged: (v) => setState(() => _search = v),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchCtrl,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(RealCmIcons.search),
+                      hintText: 'Tìm theo tên Thánh, họ tên, điện thoại...',
+                      suffixIcon: _search.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(RealCmIcons.close),
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                setState(() => _search = '');
+                              },
+                            )
+                          : null,
+                    ),
+                    onChanged: (v) => setState(() => _search = v),
+                  ),
+                ),
+                const SizedBox(width: RealCmSpacing.s3),
+                asyncList.maybeWhen(
+                  data: (list) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: RealCmSpacing.s3, vertical: RealCmSpacing.s2),
+                    decoration: BoxDecoration(
+                      color: RealCmColors.surfaceVariant,
+                      borderRadius: BorderRadius.circular(RealCmRadius.full),
+                    ),
+                    child: Text('${list.length} giáo dân',
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  ),
+                  orElse: () => const SizedBox.shrink(),
+                ),
+              ],
             ),
           ),
           Expanded(
             child: asyncList.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, st) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(RealCmSpacing.s5),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(RealCmIcons.error, size: 48, color: RealCmColors.danger),
-                      const SizedBox(height: RealCmSpacing.s3),
-                      Text(t.commonError, style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: RealCmSpacing.s2),
-                      Text('$e', style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
-                    ],
-                  ),
-                ),
-              ),
+              error: (e, _) => _ErrorState(error: e.toString(), onRetry: () => ref.invalidate(_memberListProvider)),
               data: (members) {
-                if (members.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(RealCmIcons.member, size: 48, color: RealCmColors.textDisabled),
-                        const SizedBox(height: RealCmSpacing.s3),
-                        Text(t.commonEmpty, style: Theme.of(context).textTheme.titleMedium),
-                      ],
-                    ),
-                  );
-                }
+                if (members.isEmpty) return _EmptyState(canAdd: canEdit, onAdd: _addNew, hasSearch: _search.isNotEmpty);
                 return ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: RealCmSpacing.s2),
                   itemCount: members.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, __) => const Divider(height: 1, indent: 72),
                   itemBuilder: (_, i) {
                     final m = members[i];
                     return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: RealCmSpacing.s4, vertical: RealCmSpacing.s2),
                       leading: CircleAvatar(
-                        backgroundColor: RealCmColors.surfaceVariant,
-                        child: Text(_initials(m.displayName), style: const TextStyle(color: RealCmColors.text)),
+                        radius: 22,
+                        backgroundColor: _genderColor(m.gender).withValues(alpha: 0.15),
+                        child: Text(_initials(m.displayName),
+                            style: TextStyle(color: _genderColor(m.gender), fontWeight: FontWeight.w600)),
                       ),
-                      title: Text(m.displayName),
-                      subtitle: Text(_subtitle(m)),
-                      trailing: m.gender == RealCmGender.female
-                          ? const Icon(Icons.female, color: RealCmColors.primaryLight)
-                          : m.gender == RealCmGender.male
-                              ? const Icon(Icons.male, color: RealCmColors.info)
-                              : null,
-                      onTap: () {
-                        // TODO Phase 4: navigate detail
-                        realCmToast(context, 'Chi tiết: ${m.displayName} (sẽ làm Phase 4)',
-                            type: RealCmToastType.info);
-                      },
+                      title: Text(m.displayName, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Wrap(
+                          spacing: RealCmSpacing.s2,
+                          runSpacing: 2,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            if (m.birthDate != null)
+                              _chip(RealCmIcons.calendar, df.format(m.birthDate!)),
+                            if (m.phone != null && m.phone!.isNotEmpty)
+                              _chip(Icons.phone_outlined, m.phone!),
+                            if (m.address != null && m.address!.isNotEmpty)
+                              _chip(Icons.location_on_outlined, m.address!),
+                            if (m.status != RealCmMemberStatus.active)
+                              _statusChip(m.status),
+                          ],
+                        ),
+                      ),
+                      trailing: canEdit
+                          ? PopupMenuButton<String>(
+                              icon: const Icon(RealCmIcons.more),
+                              onSelected: (v) {
+                                if (v == 'edit') _edit(m);
+                                if (v == 'delete') _delete(m);
+                              },
+                              itemBuilder: (_) => const [
+                                PopupMenuItem(value: 'edit', child: Row(children: [Icon(RealCmIcons.edit, size: 18), SizedBox(width: 8), Text('Sửa')])),
+                                PopupMenuItem(value: 'delete', child: Row(children: [Icon(RealCmIcons.delete, size: 18, color: RealCmColors.danger), SizedBox(width: 8), Text('Xoá', style: TextStyle(color: RealCmColors.danger))])),
+                              ],
+                            )
+                          : null,
+                      onTap: canEdit ? () => _edit(m) : null,
                     );
                   },
                 );
@@ -123,97 +197,131 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
           ),
         ],
       ),
-      floatingActionButton: auth.canEditMembers
-          ? FloatingActionButton(
-              onPressed: () {
-                realCmToast(context, 'Thêm giáo dân (sẽ làm Phase 4)', type: RealCmToastType.info);
-              },
-              tooltip: t.memberAddTitle,
-              child: const Icon(RealCmIcons.add),
-            )
-          : null,
     );
   }
 
-  static String _initials(String name) {
+  Color _genderColor(RealCmGender? g) {
+    switch (g) {
+      case RealCmGender.male: return RealCmColors.info;
+      case RealCmGender.female: return RealCmColors.primary;
+      default: return RealCmColors.textMuted;
+    }
+  }
+
+  String _initials(String name) {
     final parts = name.trim().split(RegExp(r'\s+'));
     if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
     return (parts.first.substring(0, 1) + parts.last.substring(0, 1)).toUpperCase();
   }
 
-  static String _subtitle(Member m) {
-    final parts = <String>[];
-    if (m.phone != null && m.phone!.isNotEmpty) parts.add(m.phone!);
-    if (m.address != null && m.address!.isNotEmpty) parts.add(m.address!);
-    return parts.join(' · ');
+  Widget _chip(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13, color: RealCmColors.textMuted),
+        const SizedBox(width: 4),
+        Text(text, style: const TextStyle(fontSize: 12, color: RealCmColors.textMuted)),
+      ],
+    );
+  }
+
+  Widget _statusChip(RealCmMemberStatus s) {
+    String label;
+    Color color;
+    switch (s) {
+      case RealCmMemberStatus.movedOut:
+        label = 'Đã chuyển xứ';
+        color = RealCmColors.warning;
+        break;
+      case RealCmMemberStatus.deceased:
+        label = 'Đã qua đời';
+        color = RealCmColors.textMuted;
+        break;
+      case RealCmMemberStatus.excommunicated:
+        label = 'Vạ tuyệt thông';
+        color = RealCmColors.danger;
+        break;
+      default:
+        return const SizedBox.shrink();
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(RealCmRadius.full),
+      ),
+      child: Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600)),
+    );
   }
 }
 
-class _NavDrawer extends StatelessWidget {
-  const _NavDrawer({required this.role});
-  final String role;
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.canAdd, required this.onAdd, required this.hasSearch});
+  final bool canAdd;
+  final VoidCallback onAdd;
+  final bool hasSearch;
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(color: RealCmColors.primary),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(RealCmIcons.parish, color: Colors.white, size: 36),
-                const SizedBox(height: RealCmSpacing.s2),
-                Text(t.appTitle, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600)),
-                const SizedBox(height: RealCmSpacing.s1),
-                Text(_roleLabel(role), style: const TextStyle(color: Colors.white70, fontSize: 12)),
-              ],
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(RealCmSpacing.s5),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(hasSearch ? RealCmIcons.search : RealCmIcons.member, size: 56, color: RealCmColors.textDisabled),
+            const SizedBox(height: RealCmSpacing.s3),
+            Text(hasSearch ? 'Không tìm thấy giáo dân nào' : 'Chưa có giáo dân nào',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: RealCmSpacing.s2),
+            Text(
+              hasSearch ? 'Thử từ khoá khác hoặc xoá bộ lọc.' : 'Thêm giáo dân đầu tiên cho giáo xứ.',
+              style: const TextStyle(color: RealCmColors.textMuted),
+              textAlign: TextAlign.center,
             ),
-          ),
-          _navItem(context, RealCmIcons.member, t.navMembers, '/'),
-          _navItem(context, RealCmIcons.family, t.navFamilies, '/families'),
-          _navItem(context, RealCmIcons.district, t.navDistricts, '/districts'),
-          const Divider(),
-          _navItem(context, RealCmIcons.baptism, t.sacramentBaptism, '/sacrament/baptism'),
-          _navItem(context, RealCmIcons.confirmation, t.sacramentConfirmation, '/sacrament/confirmation'),
-          _navItem(context, RealCmIcons.marriage, t.sacramentMarriage, '/sacrament/marriage'),
-          _navItem(context, RealCmIcons.anointing, t.sacramentAnointing, '/sacrament/anointing'),
-          _navItem(context, RealCmIcons.funeral, t.sacramentFuneral, '/sacrament/funeral'),
-          const Divider(),
-          _navItem(context, RealCmIcons.group, t.navGroups, '/groups'),
-          _navItem(context, RealCmIcons.mass, t.navMass, '/mass'),
-          _navItem(context, RealCmIcons.calendar, t.navCalendar, '/calendar'),
-          _navItem(context, RealCmIcons.donation, t.navDonations, '/donations'),
-          _navItem(context, RealCmIcons.report, t.navReports, '/reports'),
-          const Divider(),
-          _navItem(context, RealCmIcons.settings, t.navSettings, '/settings'),
-        ],
+            if (!hasSearch && canAdd) ...[
+              const SizedBox(height: RealCmSpacing.s4),
+              ElevatedButton.icon(
+                onPressed: onAdd,
+                icon: const Icon(RealCmIcons.add),
+                label: const Text('Thêm giáo dân'),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _navItem(BuildContext ctx, IconData icon, String label, String route) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(label),
-      onTap: () {
-        Navigator.of(ctx).pop();
-        // TODO Phase 4-6: navigate qua go_router
-      },
+class _ErrorState extends StatelessWidget {
+  const _ErrorState({required this.error, required this.onRetry});
+  final String error;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(RealCmSpacing.s5),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(RealCmIcons.error, size: 56, color: RealCmColors.danger),
+            const SizedBox(height: RealCmSpacing.s3),
+            const Text('Lỗi tải dữ liệu', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: RealCmSpacing.s2),
+            Text(error, style: const TextStyle(color: RealCmColors.textMuted), textAlign: TextAlign.center),
+            const SizedBox(height: RealCmSpacing.s4),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(RealCmIcons.refresh),
+              label: const Text('Thử lại'),
+            ),
+          ],
+        ),
+      ),
     );
-  }
-
-  static String _roleLabel(String role) {
-    switch (role) {
-      case 'priest_pastor': return 'Cha xứ';
-      case 'priest_assistant': return 'Cha phó';
-      case 'secretary': return 'Thư ký';
-      case 'council_member': return 'Hội đồng mục vụ';
-      default: return 'Khách';
-    }
   }
 }
