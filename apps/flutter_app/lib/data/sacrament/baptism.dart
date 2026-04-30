@@ -1,6 +1,5 @@
 // Baptism repository — pattern canonical cho 5 sổ Bí Tích.
 // Confirmation/Marriage/Anointing/Funeral repository follow cùng pattern này.
-import 'package:pocketbase/pocketbase.dart';
 import '../../core/logging/logger.dart';
 import '../../domain/sacrament/baptism.dart';
 import '../../platform/pocketbase/client.dart';
