@@ -1,198 +1,919 @@
-// PLACEHOLDER — file này sẽ được `flutter gen-l10n` tự sinh từ `lib/l10n/app_*.arb`.
-// Manual fallback cho scaffold v1 trước khi user chạy `flutter pub get && flutter gen-l10n`.
-// Khi flutter SDK đã cài, chạy `flutter gen-l10n` ở thư mục apps/flutter_app/ — sẽ ghi đè file này.
-import 'package:flutter/material.dart';
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
-class AppLocalizations {
-  AppLocalizations(this.locale);
-  final Locale locale;
+import 'app_localizations_en.dart';
+import 'app_localizations_vi.dart';
 
-  static AppLocalizations? of(BuildContext context) =>
-      Localizations.of<AppLocalizations>(context, AppLocalizations);
+// ignore_for_file: type=lint
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'generated/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
+  final String localeName;
+
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
   ];
 
-  static const List<Locale> supportedLocales = [Locale('vi'), Locale('en')];
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('vi')
+  ];
 
-  String _t(Map<String, String> vi, Map<String, String> en, String key) {
-    final lang = locale.languageCode;
-    final map = lang == 'en' ? en : vi;
-    return map[key] ?? vi[key] ?? key;
-  }
+  /// App title
+  ///
+  /// In vi, this message translates to:
+  /// **'Quản lý Giáo xứ'**
+  String get appTitle;
 
-  String get appTitle => _t(_vi, _en, 'appTitle');
-  String get commonSubmit => _t(_vi, _en, 'commonSubmit');
-  String get commonSave => _t(_vi, _en, 'commonSave');
-  String get commonCancel => _t(_vi, _en, 'commonCancel');
-  String get commonConfirm => _t(_vi, _en, 'commonConfirm');
-  String get commonDelete => _t(_vi, _en, 'commonDelete');
-  String get commonEdit => _t(_vi, _en, 'commonEdit');
-  String get commonAdd => _t(_vi, _en, 'commonAdd');
-  String get commonSearch => _t(_vi, _en, 'commonSearch');
-  String get commonClose => _t(_vi, _en, 'commonClose');
-  String get commonBack => _t(_vi, _en, 'commonBack');
-  String get commonNext => _t(_vi, _en, 'commonNext');
-  String get commonLoading => _t(_vi, _en, 'commonLoading');
-  String get commonEmpty => _t(_vi, _en, 'commonEmpty');
-  String get commonError => _t(_vi, _en, 'commonError');
-  String get commonSuccess => _t(_vi, _en, 'commonSuccess');
-  String get commonRequired => _t(_vi, _en, 'commonRequired');
-  String get commonOptional => _t(_vi, _en, 'commonOptional');
-  String get commonYes => _t(_vi, _en, 'commonYes');
-  String get commonNo => _t(_vi, _en, 'commonNo');
+  /// No description provided for @commonSubmit.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi'**
+  String get commonSubmit;
 
-  String get navMembers => _t(_vi, _en, 'navMembers');
-  String get navFamilies => _t(_vi, _en, 'navFamilies');
-  String get navDistricts => _t(_vi, _en, 'navDistricts');
-  String get navSacraments => _t(_vi, _en, 'navSacraments');
-  String get navGroups => _t(_vi, _en, 'navGroups');
-  String get navMass => _t(_vi, _en, 'navMass');
-  String get navCalendar => _t(_vi, _en, 'navCalendar');
-  String get navDonations => _t(_vi, _en, 'navDonations');
-  String get navReports => _t(_vi, _en, 'navReports');
-  String get navSettings => _t(_vi, _en, 'navSettings');
+  /// No description provided for @commonSave.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu'**
+  String get commonSave;
 
-  String get authLoginTitle => _t(_vi, _en, 'authLoginTitle');
-  String get authEmailLabel => _t(_vi, _en, 'authEmailLabel');
-  String get authPasswordLabel => _t(_vi, _en, 'authPasswordLabel');
-  String get authLoginButton => _t(_vi, _en, 'authLoginButton');
-  String get authLogoutButton => _t(_vi, _en, 'authLogoutButton');
-  String get authEmailRequired => _t(_vi, _en, 'authEmailRequired');
-  String get authPasswordRequired => _t(_vi, _en, 'authPasswordRequired');
-  String get authLoginFailed => _t(_vi, _en, 'authLoginFailed');
+  /// No description provided for @commonCancel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Huỷ'**
+  String get commonCancel;
 
-  String get setupTitle => _t(_vi, _en, 'setupTitle');
-  String get setupDescription => _t(_vi, _en, 'setupDescription');
-  String get setupBackendUrlLabel => _t(_vi, _en, 'setupBackendUrlLabel');
-  String get setupBackendUrlHint => _t(_vi, _en, 'setupBackendUrlHint');
-  String get setupConnectButton => _t(_vi, _en, 'setupConnectButton');
-  String get setupInvalidUrl => _t(_vi, _en, 'setupInvalidUrl');
+  /// No description provided for @commonConfirm.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận'**
+  String get commonConfirm;
 
-  String get memberListTitle => _t(_vi, _en, 'memberListTitle');
-  String get memberAddTitle => _t(_vi, _en, 'memberAddTitle');
-  String get memberEditTitle => _t(_vi, _en, 'memberEditTitle');
-  String get memberDetailTitle => _t(_vi, _en, 'memberDetailTitle');
-  String get memberSaintName => _t(_vi, _en, 'memberSaintName');
-  String get memberFullName => _t(_vi, _en, 'memberFullName');
-  String get memberGender => _t(_vi, _en, 'memberGender');
-  String get memberGenderMale => _t(_vi, _en, 'memberGenderMale');
-  String get memberGenderFemale => _t(_vi, _en, 'memberGenderFemale');
-  String get memberGenderOther => _t(_vi, _en, 'memberGenderOther');
-  String get memberBirthDate => _t(_vi, _en, 'memberBirthDate');
-  String get memberPhone => _t(_vi, _en, 'memberPhone');
-  String get memberEmail => _t(_vi, _en, 'memberEmail');
-  String get memberAddress => _t(_vi, _en, 'memberAddress');
-  String get memberDistrict => _t(_vi, _en, 'memberDistrict');
-  String get memberFamily => _t(_vi, _en, 'memberFamily');
-  String get memberStatus => _t(_vi, _en, 'memberStatus');
-  String get memberStatusActive => _t(_vi, _en, 'memberStatusActive');
-  String get memberDeleteConfirm => _t(_vi, _en, 'memberDeleteConfirm');
-  String get memberSearchHint => _t(_vi, _en, 'memberSearchHint');
+  /// No description provided for @commonDelete.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xoá'**
+  String get commonDelete;
 
-  String get sacramentBaptism => _t(_vi, _en, 'sacramentBaptism');
-  String get sacramentConfirmation => _t(_vi, _en, 'sacramentConfirmation');
-  String get sacramentMarriage => _t(_vi, _en, 'sacramentMarriage');
-  String get sacramentAnointing => _t(_vi, _en, 'sacramentAnointing');
-  String get sacramentFuneral => _t(_vi, _en, 'sacramentFuneral');
-  String get sacramentPrintCertificate => _t(_vi, _en, 'sacramentPrintCertificate');
+  /// No description provided for @commonEdit.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sửa'**
+  String get commonEdit;
+
+  /// No description provided for @commonAdd.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm'**
+  String get commonAdd;
+
+  /// No description provided for @commonSearch.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tìm kiếm'**
+  String get commonSearch;
+
+  /// No description provided for @commonClose.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đóng'**
+  String get commonClose;
+
+  /// No description provided for @commonBack.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quay lại'**
+  String get commonBack;
+
+  /// No description provided for @commonNext.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiếp'**
+  String get commonNext;
+
+  /// No description provided for @commonLoading.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tải...'**
+  String get commonLoading;
+
+  /// No description provided for @commonEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có dữ liệu'**
+  String get commonEmpty;
+
+  /// No description provided for @commonError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xảy ra lỗi. Thử lại.'**
+  String get commonError;
+
+  /// No description provided for @commonSuccess.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thành công'**
+  String get commonSuccess;
+
+  /// No description provided for @commonRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'(bắt buộc)'**
+  String get commonRequired;
+
+  /// No description provided for @commonOptional.
+  ///
+  /// In vi, this message translates to:
+  /// **'(tuỳ chọn)'**
+  String get commonOptional;
+
+  /// No description provided for @commonYes.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có'**
+  String get commonYes;
+
+  /// No description provided for @commonNo.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không'**
+  String get commonNo;
+
+  /// No description provided for @navMembers.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giáo dân'**
+  String get navMembers;
+
+  /// No description provided for @navFamilies.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gia đình'**
+  String get navFamilies;
+
+  /// No description provided for @navDistricts.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giáo họ'**
+  String get navDistricts;
+
+  /// No description provided for @navSacraments.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sổ Bí Tích'**
+  String get navSacraments;
+
+  /// No description provided for @navGroups.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đoàn thể'**
+  String get navGroups;
+
+  /// No description provided for @navMass.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lễ ý'**
+  String get navMass;
+
+  /// No description provided for @navCalendar.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lịch phụng vụ'**
+  String get navCalendar;
+
+  /// No description provided for @navDonations.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sổ thu chi'**
+  String get navDonations;
+
+  /// No description provided for @navReports.
+  ///
+  /// In vi, this message translates to:
+  /// **'Báo cáo'**
+  String get navReports;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cấu hình'**
+  String get navSettings;
+
+  /// No description provided for @authLoginTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập'**
+  String get authLoginTitle;
+
+  /// No description provided for @authEmailLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Email'**
+  String get authEmailLabel;
+
+  /// No description provided for @authPasswordLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu'**
+  String get authPasswordLabel;
+
+  /// No description provided for @authLoginButton.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập'**
+  String get authLoginButton;
+
+  /// No description provided for @authLogoutButton.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng xuất'**
+  String get authLogoutButton;
+
+  /// No description provided for @authEmailRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập email'**
+  String get authEmailRequired;
+
+  /// No description provided for @authPasswordRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập mật khẩu'**
+  String get authPasswordRequired;
+
+  /// No description provided for @authLoginFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập thất bại. Kiểm tra email/mật khẩu.'**
+  String get authLoginFailed;
+
+  /// No description provided for @setupTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cấu hình kết nối'**
+  String get setupTitle;
+
+  /// No description provided for @setupDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập địa chỉ máy chủ PocketBase của giáo xứ. Ví dụ: http://192.168.1.100:8090 hoặc https://parish.example.com'**
+  String get setupDescription;
+
+  /// No description provided for @setupBackendUrlLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Địa chỉ máy chủ'**
+  String get setupBackendUrlLabel;
+
+  /// No description provided for @setupBackendUrlHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'http://127.0.0.1:8090'**
+  String get setupBackendUrlHint;
+
+  /// No description provided for @setupConnectButton.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết nối'**
+  String get setupConnectButton;
+
+  /// No description provided for @setupInvalidUrl.
+  ///
+  /// In vi, this message translates to:
+  /// **'URL không hợp lệ'**
+  String get setupInvalidUrl;
+
+  /// No description provided for @memberListTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Danh sách giáo dân'**
+  String get memberListTitle;
+
+  /// No description provided for @memberAddTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm giáo dân'**
+  String get memberAddTitle;
+
+  /// No description provided for @memberEditTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sửa giáo dân'**
+  String get memberEditTitle;
+
+  /// No description provided for @memberDetailTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ giáo dân'**
+  String get memberDetailTitle;
+
+  /// No description provided for @memberSaintName.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tên Thánh'**
+  String get memberSaintName;
+
+  /// No description provided for @memberFullName.
+  ///
+  /// In vi, this message translates to:
+  /// **'Họ và tên'**
+  String get memberFullName;
+
+  /// No description provided for @memberGender.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giới tính'**
+  String get memberGender;
+
+  /// No description provided for @memberGenderMale.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nam'**
+  String get memberGenderMale;
+
+  /// No description provided for @memberGenderFemale.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nữ'**
+  String get memberGenderFemale;
+
+  /// No description provided for @memberGenderOther.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khác'**
+  String get memberGenderOther;
+
+  /// No description provided for @memberBirthDate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày sinh'**
+  String get memberBirthDate;
+
+  /// No description provided for @memberBirthPlace.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nơi sinh'**
+  String get memberBirthPlace;
+
+  /// No description provided for @memberDeathDate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày qua đời'**
+  String get memberDeathDate;
+
+  /// No description provided for @memberPhone.
+  ///
+  /// In vi, this message translates to:
+  /// **'Điện thoại'**
+  String get memberPhone;
+
+  /// No description provided for @memberEmail.
+  ///
+  /// In vi, this message translates to:
+  /// **'Email'**
+  String get memberEmail;
+
+  /// No description provided for @memberAddress.
+  ///
+  /// In vi, this message translates to:
+  /// **'Địa chỉ'**
+  String get memberAddress;
+
+  /// No description provided for @memberDistrict.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giáo họ'**
+  String get memberDistrict;
+
+  /// No description provided for @memberFamily.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gia đình'**
+  String get memberFamily;
+
+  /// No description provided for @memberFather.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tên cha'**
+  String get memberFather;
+
+  /// No description provided for @memberMother.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tên mẹ'**
+  String get memberMother;
+
+  /// No description provided for @memberSpouse.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vợ/Chồng'**
+  String get memberSpouse;
+
+  /// No description provided for @memberPhoto.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ảnh'**
+  String get memberPhoto;
+
+  /// No description provided for @memberNotes.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi chú'**
+  String get memberNotes;
+
+  /// No description provided for @memberStatus.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tình trạng'**
+  String get memberStatus;
+
+  /// No description provided for @memberStatusActive.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang hoạt động'**
+  String get memberStatusActive;
+
+  /// No description provided for @memberStatusMovedOut.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã chuyển xứ'**
+  String get memberStatusMovedOut;
+
+  /// No description provided for @memberStatusDeceased.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã qua đời'**
+  String get memberStatusDeceased;
+
+  /// No description provided for @memberDeleteConfirm.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn có chắc muốn xoá giáo dân này?'**
+  String get memberDeleteConfirm;
+
+  /// No description provided for @memberSearchHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tìm theo tên Thánh, họ tên, điện thoại...'**
+  String get memberSearchHint;
+
+  /// No description provided for @sacramentBaptism.
+  ///
+  /// In vi, this message translates to:
+  /// **'Rửa Tội'**
+  String get sacramentBaptism;
+
+  /// No description provided for @sacramentConfirmation.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm Sức'**
+  String get sacramentConfirmation;
+
+  /// No description provided for @sacramentMarriage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hôn Phối'**
+  String get sacramentMarriage;
+
+  /// No description provided for @sacramentAnointing.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xức Dầu Bệnh Nhân'**
+  String get sacramentAnointing;
+
+  /// No description provided for @sacramentFuneral.
+  ///
+  /// In vi, this message translates to:
+  /// **'An Táng'**
+  String get sacramentFuneral;
+
+  /// No description provided for @sacramentBookNumber.
+  ///
+  /// In vi, this message translates to:
+  /// **'Số sổ'**
+  String get sacramentBookNumber;
+
+  /// No description provided for @sacramentDate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày cử hành'**
+  String get sacramentDate;
+
+  /// No description provided for @sacramentPlace.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nơi cử hành'**
+  String get sacramentPlace;
+
+  /// No description provided for @sacramentPriest.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cha cử hành'**
+  String get sacramentPriest;
+
+  /// No description provided for @sacramentBishop.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đức Giám mục'**
+  String get sacramentBishop;
+
+  /// No description provided for @sacramentGodfather.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cha đỡ đầu'**
+  String get sacramentGodfather;
+
+  /// No description provided for @sacramentGodmother.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mẹ đỡ đầu'**
+  String get sacramentGodmother;
+
+  /// No description provided for @sacramentSponsor.
+  ///
+  /// In vi, this message translates to:
+  /// **'Người đỡ đầu'**
+  String get sacramentSponsor;
+
+  /// No description provided for @sacramentGroom.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chú rể'**
+  String get sacramentGroom;
+
+  /// No description provided for @sacramentBride.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cô dâu'**
+  String get sacramentBride;
+
+  /// No description provided for @sacramentWitness1.
+  ///
+  /// In vi, this message translates to:
+  /// **'Người chứng 1'**
+  String get sacramentWitness1;
+
+  /// No description provided for @sacramentWitness2.
+  ///
+  /// In vi, this message translates to:
+  /// **'Người chứng 2'**
+  String get sacramentWitness2;
+
+  /// No description provided for @sacramentDispensation.
+  ///
+  /// In vi, this message translates to:
+  /// **'Miễn chuẩn'**
+  String get sacramentDispensation;
+
+  /// No description provided for @sacramentDeathCause.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nguyên nhân qua đời'**
+  String get sacramentDeathCause;
+
+  /// No description provided for @sacramentBurialPlace.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nơi an táng'**
+  String get sacramentBurialPlace;
+
+  /// No description provided for @sacramentPrintCertificate.
+  ///
+  /// In vi, this message translates to:
+  /// **'In chứng chỉ'**
+  String get sacramentPrintCertificate;
+
+  /// No description provided for @groupTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đoàn thể'**
+  String get groupTitle;
+
+  /// No description provided for @groupName.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tên hội'**
+  String get groupName;
+
+  /// No description provided for @groupCode.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mã'**
+  String get groupCode;
+
+  /// No description provided for @groupTypeConfraternity.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hội đoàn'**
+  String get groupTypeConfraternity;
+
+  /// No description provided for @groupTypeYouth.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giới trẻ'**
+  String get groupTypeYouth;
+
+  /// No description provided for @groupTypeChoir.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ca đoàn'**
+  String get groupTypeChoir;
+
+  /// No description provided for @groupTypePastoral.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục vụ'**
+  String get groupTypePastoral;
+
+  /// No description provided for @groupTypeOther.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khác'**
+  String get groupTypeOther;
+
+  /// No description provided for @groupHead.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trưởng hội'**
+  String get groupHead;
+
+  /// No description provided for @groupViceHead.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phó hội'**
+  String get groupViceHead;
+
+  /// No description provided for @groupMeetingSchedule.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lịch họp/sinh hoạt'**
+  String get groupMeetingSchedule;
+
+  /// No description provided for @massIntentionTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lễ ý cầu nguyện'**
+  String get massIntentionTitle;
+
+  /// No description provided for @massIntentionRequester.
+  ///
+  /// In vi, this message translates to:
+  /// **'Người xin'**
+  String get massIntentionRequester;
+
+  /// No description provided for @massIntentionText.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ý chỉ'**
+  String get massIntentionText;
+
+  /// No description provided for @massIntentionDate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày dự kiến'**
+  String get massIntentionDate;
+
+  /// No description provided for @massIntentionStatusPending.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chờ duyệt'**
+  String get massIntentionStatusPending;
+
+  /// No description provided for @massIntentionStatusScheduled.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xếp lịch'**
+  String get massIntentionStatusScheduled;
+
+  /// No description provided for @massIntentionStatusDone.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã cử hành'**
+  String get massIntentionStatusDone;
+
+  /// No description provided for @massIntentionStatusCancelled.
+  ///
+  /// In vi, this message translates to:
+  /// **'Huỷ'**
+  String get massIntentionStatusCancelled;
+
+  /// No description provided for @donationTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sổ thu chi'**
+  String get donationTitle;
+
+  /// No description provided for @donationDate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày'**
+  String get donationDate;
+
+  /// No description provided for @donationType.
+  ///
+  /// In vi, this message translates to:
+  /// **'Loại'**
+  String get donationType;
+
+  /// No description provided for @donationTypeSundayOffering.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dâng cúng Chúa Nhật'**
+  String get donationTypeSundayOffering;
+
+  /// No description provided for @donationTypeFeastOffering.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dâng cúng lễ trọng'**
+  String get donationTypeFeastOffering;
+
+  /// No description provided for @donationTypeBuildingFund.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quỹ xây dựng'**
+  String get donationTypeBuildingFund;
+
+  /// No description provided for @donationTypeMassIntention.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xin lễ'**
+  String get donationTypeMassIntention;
+
+  /// No description provided for @donationTypeOtherIn.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thu khác'**
+  String get donationTypeOtherIn;
+
+  /// No description provided for @donationTypeExpense.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi'**
+  String get donationTypeExpense;
+
+  /// No description provided for @donationAmount.
+  ///
+  /// In vi, this message translates to:
+  /// **'Số tiền'**
+  String get donationAmount;
+
+  /// No description provided for @donationDonor.
+  ///
+  /// In vi, this message translates to:
+  /// **'Người dâng'**
+  String get donationDonor;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Báo cáo thống kê'**
+  String get reportTitle;
+
+  /// No description provided for @reportByAge.
+  ///
+  /// In vi, this message translates to:
+  /// **'Theo độ tuổi'**
+  String get reportByAge;
+
+  /// No description provided for @reportByGender.
+  ///
+  /// In vi, this message translates to:
+  /// **'Theo giới tính'**
+  String get reportByGender;
+
+  /// No description provided for @reportByDistrict.
+  ///
+  /// In vi, this message translates to:
+  /// **'Theo giáo họ'**
+  String get reportByDistrict;
+
+  /// No description provided for @reportSacramentByYear.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bí Tích theo năm'**
+  String get reportSacramentByYear;
+
+  /// No description provided for @reportExportPdf.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xuất PDF'**
+  String get reportExportPdf;
+
+  /// No description provided for @reportExportExcel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xuất Excel'**
+  String get reportExportExcel;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
+
   @override
-  bool isSupported(Locale locale) => ['vi', 'en'].contains(locale.languageCode);
-  @override
-  Future<AppLocalizations> load(Locale locale) async {
-    intl.Intl.defaultLocale = locale.toLanguageTag();
-    return AppLocalizations(locale);
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
   }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'vi'].contains(locale.languageCode);
+
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
-// Strings (extract từ app_vi.arb + app_en.arb để build chạy được trước khi gen_l10n).
-const Map<String, String> _vi = {
-  'appTitle': 'Quản lý Giáo xứ',
-  'commonSubmit': 'Gửi', 'commonSave': 'Lưu', 'commonCancel': 'Huỷ',
-  'commonConfirm': 'Xác nhận', 'commonDelete': 'Xoá', 'commonEdit': 'Sửa', 'commonAdd': 'Thêm',
-  'commonSearch': 'Tìm kiếm', 'commonClose': 'Đóng', 'commonBack': 'Quay lại', 'commonNext': 'Tiếp',
-  'commonLoading': 'Đang tải...', 'commonEmpty': 'Chưa có dữ liệu',
-  'commonError': 'Đã xảy ra lỗi. Thử lại.', 'commonSuccess': 'Thành công',
-  'commonRequired': '(bắt buộc)', 'commonOptional': '(tuỳ chọn)',
-  'commonYes': 'Có', 'commonNo': 'Không',
-  'navMembers': 'Giáo dân', 'navFamilies': 'Gia đình', 'navDistricts': 'Giáo họ',
-  'navSacraments': 'Sổ Bí Tích', 'navGroups': 'Đoàn thể', 'navMass': 'Lễ ý',
-  'navCalendar': 'Lịch phụng vụ', 'navDonations': 'Sổ thu chi', 'navReports': 'Báo cáo',
-  'navSettings': 'Cấu hình',
-  'authLoginTitle': 'Đăng nhập', 'authEmailLabel': 'Email', 'authPasswordLabel': 'Mật khẩu',
-  'authLoginButton': 'Đăng nhập', 'authLogoutButton': 'Đăng xuất',
-  'authEmailRequired': 'Vui lòng nhập email', 'authPasswordRequired': 'Vui lòng nhập mật khẩu',
-  'authLoginFailed': 'Đăng nhập thất bại. Kiểm tra email/mật khẩu.',
-  'setupTitle': 'Cấu hình kết nối',
-  'setupDescription': 'Nhập địa chỉ máy chủ PocketBase của giáo xứ. Ví dụ: http://192.168.1.100:8090 hoặc https://parish.example.com',
-  'setupBackendUrlLabel': 'Địa chỉ máy chủ', 'setupBackendUrlHint': 'http://127.0.0.1:8090',
-  'setupConnectButton': 'Kết nối', 'setupInvalidUrl': 'URL không hợp lệ',
-  'memberListTitle': 'Danh sách giáo dân', 'memberAddTitle': 'Thêm giáo dân',
-  'memberEditTitle': 'Sửa giáo dân', 'memberDetailTitle': 'Hồ sơ giáo dân',
-  'memberSaintName': 'Tên Thánh', 'memberFullName': 'Họ và tên',
-  'memberGender': 'Giới tính', 'memberGenderMale': 'Nam', 'memberGenderFemale': 'Nữ', 'memberGenderOther': 'Khác',
-  'memberBirthDate': 'Ngày sinh', 'memberPhone': 'Điện thoại', 'memberEmail': 'Email',
-  'memberAddress': 'Địa chỉ', 'memberDistrict': 'Giáo họ', 'memberFamily': 'Gia đình',
-  'memberStatus': 'Tình trạng', 'memberStatusActive': 'Đang hoạt động',
-  'memberDeleteConfirm': 'Bạn có chắc muốn xoá giáo dân này?',
-  'memberSearchHint': 'Tìm theo tên Thánh, họ tên, điện thoại...',
-  'sacramentBaptism': 'Rửa Tội', 'sacramentConfirmation': 'Thêm Sức',
-  'sacramentMarriage': 'Hôn Phối', 'sacramentAnointing': 'Xức Dầu Bệnh Nhân',
-  'sacramentFuneral': 'An Táng', 'sacramentPrintCertificate': 'In chứng chỉ',
-};
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'vi':
+      return AppLocalizationsVi();
+  }
 
-const Map<String, String> _en = {
-  'appTitle': 'Parish Manager',
-  'commonSubmit': 'Submit', 'commonSave': 'Save', 'commonCancel': 'Cancel',
-  'commonConfirm': 'Confirm', 'commonDelete': 'Delete', 'commonEdit': 'Edit', 'commonAdd': 'Add',
-  'commonSearch': 'Search', 'commonClose': 'Close', 'commonBack': 'Back', 'commonNext': 'Next',
-  'commonLoading': 'Loading...', 'commonEmpty': 'No data yet',
-  'commonError': 'An error occurred. Try again.', 'commonSuccess': 'Success',
-  'commonRequired': '(required)', 'commonOptional': '(optional)',
-  'commonYes': 'Yes', 'commonNo': 'No',
-  'navMembers': 'Parishioners', 'navFamilies': 'Families', 'navDistricts': 'Districts',
-  'navSacraments': 'Sacrament books', 'navGroups': 'Groups', 'navMass': 'Mass intentions',
-  'navCalendar': 'Liturgical calendar', 'navDonations': 'Donations', 'navReports': 'Reports',
-  'navSettings': 'Settings',
-  'authLoginTitle': 'Sign in', 'authEmailLabel': 'Email', 'authPasswordLabel': 'Password',
-  'authLoginButton': 'Sign in', 'authLogoutButton': 'Sign out',
-  'authEmailRequired': 'Email is required', 'authPasswordRequired': 'Password is required',
-  'authLoginFailed': 'Login failed. Check email/password.',
-  'setupTitle': 'Connection setup',
-  'setupDescription': 'Enter the PocketBase server address of your parish.',
-  'setupBackendUrlLabel': 'Server address', 'setupBackendUrlHint': 'http://127.0.0.1:8090',
-  'setupConnectButton': 'Connect', 'setupInvalidUrl': 'Invalid URL',
-  'memberListTitle': 'Parishioner list', 'memberAddTitle': 'Add parishioner',
-  'memberEditTitle': 'Edit parishioner', 'memberDetailTitle': 'Parishioner profile',
-  'memberSaintName': 'Saint name', 'memberFullName': 'Full name',
-  'memberGender': 'Gender', 'memberGenderMale': 'Male', 'memberGenderFemale': 'Female', 'memberGenderOther': 'Other',
-  'memberBirthDate': 'Date of birth', 'memberPhone': 'Phone', 'memberEmail': 'Email',
-  'memberAddress': 'Address', 'memberDistrict': 'District', 'memberFamily': 'Family',
-  'memberStatus': 'Status', 'memberStatusActive': 'Active',
-  'memberDeleteConfirm': 'Are you sure to delete this parishioner?',
-  'memberSearchHint': 'Search by saint name, full name, phone...',
-  'sacramentBaptism': 'Baptism', 'sacramentConfirmation': 'Confirmation',
-  'sacramentMarriage': 'Marriage', 'sacramentAnointing': 'Anointing of the Sick',
-  'sacramentFuneral': 'Funeral', 'sacramentPrintCertificate': 'Print certificate',
-};
-
-// Avoid analyzer warning about unused intl import in some setups.
-// ignore: unused_element
-const _kUseIntl = identical(intl.Intl.systemLocale, intl.Intl.systemLocale);
-// ignore: unused_element
-const _kUseFoundation = kIsWeb || !kIsWeb;
+  throw FlutterError(
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
+}
