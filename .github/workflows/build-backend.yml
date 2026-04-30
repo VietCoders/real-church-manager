@@ -1,0 +1,44 @@
+name: Build Backend Bundle
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [linux, darwin, windows]
+        arch: [amd64, arm64]
+        exclude:
+          - os: windows
+            arch: arm64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set vars
+        run: |
+          echo "PB_VERSION=0.22.21" >> $GITHUB_ENV
+          echo "EXT=$([ '${{ matrix.os }}' = 'windows' ] && echo '.exe' || echo '')" >> $GITHUB_ENV
+      - name: Download PocketBase ${{ env.PB_VERSION }} ${{ matrix.os }}/${{ matrix.arch }}
+        run: |
+          URL="https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_${{ matrix.os }}_${{ matrix.arch }}.zip"
+          echo "→ $URL"
+          curl -fsSL "$URL" -o pb.zip
+          unzip -q pb.zip
+      - name: Bundle backend
+        run: |
+          BUNDLE="real-cm-server-${{ matrix.os }}-${{ matrix.arch }}"
+          mkdir -p "$BUNDLE"
+          cp pocketbase${EXT} "$BUNDLE/"
+          cp -r backend/pb_migrations "$BUNDLE/"
+          cp -r backend/pb_hooks "$BUNDLE/"
+          cp backend/start.sh backend/start.bat backend/README.md "$BUNDLE/" || true
+          cp packages/schema/collections.json "$BUNDLE/"
+          cp LICENSE "$BUNDLE/"
+          tar -czf "${BUNDLE}.tar.gz" "$BUNDLE"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: real-cm-server-${{ matrix.os }}-${{ matrix.arch }}
+          path: real-cm-server-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
