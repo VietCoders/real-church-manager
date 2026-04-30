@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'design/theme.dart';
 import 'features/auth/change_password_screen.dart';
 import 'features/auth/login_screen.dart';
-import 'features/member/list_screen.dart';
+import 'features/dashboard/dashboard_screen.dart';
 import 'features/settings/connection_screen.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'platform/pocketbase/auth.dart';
