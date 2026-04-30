@@ -22,6 +22,12 @@
           "type": "relation",
           "required": false,
           "options": {"collectionId": "members", "cascadeDelete": false, "maxSelect": 1}
+        },
+        {
+          "name": "must_change_password",
+          "type": "bool",
+          "required": false,
+          "options": {}
         }
       ],
       "indexes": [],
