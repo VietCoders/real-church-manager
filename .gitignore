@@ -58,8 +58,9 @@ out/
 *.aab
 *.ipa
 
-# Logs
+# Logs (KHÔNG ignore maps/touched.log — file này là source-of-truth task tracking)
 *.log
+!maps/touched.log
 logs/
 
 # Backup
