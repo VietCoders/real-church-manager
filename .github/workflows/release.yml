@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    needs: []
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Đợi 2 workflow build xong (qua reusable workflow trigger trên cùng tag).
+      # Workflow này KHÔNG re-build, chỉ aggregate + tạo Release.
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          if git tag --list 'v*' | head -2 | tail -1 > /tmp/prev-tag 2>/dev/null && [ -s /tmp/prev-tag ]; then
+            PREV=$(cat /tmp/prev-tag)
+            echo "## Thay đổi từ $PREV" > /tmp/changelog.md
+            git log --pretty=format:'- %s' "$PREV..HEAD" >> /tmp/changelog.md
+          else
+            echo "## Phát hành lần đầu" > /tmp/changelog.md
+            echo "" >> /tmp/changelog.md
+            echo "Phần mềm quản lý giáo xứ Công giáo VN, đa nền tảng (Win+Mac+Android+Linux), đồng bộ thời gian thực, mã nguồn mở MIT." >> /tmp/changelog.md
+          fi
+          cat /tmp/changelog.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: /tmp/changelog.md
+          generate_release_notes: true
+          draft: false
+          prerelease: false
