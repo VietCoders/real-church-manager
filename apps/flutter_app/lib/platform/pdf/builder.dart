@@ -84,7 +84,7 @@ class RealCmCertificateBuilder {
                     children: [
                       pw.Text('Cha xứ', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
                       pw.SizedBox(height: 8),
-                      pw.Text('(Ký và ghi rõ họ tên)', style: const pw.TextStyle(fontSize: 9, fontStyle: pw.FontStyle.italic)),
+                      pw.Text('(Ký và ghi rõ họ tên)', style: pw.TextStyle(fontSize: 9, fontStyle: pw.FontStyle.italic)),
                       pw.SizedBox(height: 56),
                     ],
                   ),
