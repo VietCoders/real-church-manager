@@ -64,15 +64,43 @@ class RealCmAuthController extends StateNotifier<RealCmAuthState> {
 
   final _log = RealCmLogger.of('auth');
 
-  Future<void> login({required String email, required String password}) async {
+  Future<void> login({required String identity, required String password}) async {
     final pb = RealCmPocketBase.instance();
-    final res = await pb.collection('users').authWithPassword(email, password);
+    final res = await pb.collection('users').authWithPassword(identity, password);
     state = state.copyWith(
       isAuthenticated: true,
       user: res.record,
       role: res.record.data['role'] as String?,
+      mustChangePassword: (res.record.data['must_change_password'] as bool?) ?? false,
     );
-    _log.info('Login OK: ${res.record.id}, role=${state.role}');
+    _log.info('Login OK: ${res.record.id}, role=${state.role}, mustChange=${state.mustChangePassword}');
+  }
+
+  /// Đổi mật khẩu — yêu cầu mật khẩu cũ + mới.
+  /// Sau khi đổi: clear flag must_change_password.
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    final pb = RealCmPocketBase.instance();
+    final user = state.user;
+    if (user == null) throw StateError('Chưa đăng nhập.');
+    await pb.collection('users').update(user.id, body: {
+      'oldPassword': oldPassword,
+      'password': newPassword,
+      'passwordConfirm': newPassword,
+      'must_change_password': false,
+    });
+    // Re-auth với password mới để refresh token + record
+    final identity = (user.data['username'] as String?) ?? (user.data['email'] as String? ?? '');
+    final res = await pb.collection('users').authWithPassword(identity, newPassword);
+    state = state.copyWith(
+      isAuthenticated: true,
+      user: res.record,
+      role: res.record.data['role'] as String?,
+      mustChangePassword: false,
+    );
+    _log.info('Đổi mật khẩu OK: ${res.record.id}');
   }
 
   Future<void> logout() async {
