@@ -46,7 +46,7 @@ class RealCmCertificateBuilder {
               pw.Text('CHỨNG CHỈ RỬA TỘI',
                   style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
               pw.Text('(Certificatum Baptismi)',
-                  style: const pw.TextStyle(fontSize: 11, fontStyle: pw.FontStyle.italic)),
+                  style: pw.TextStyle(fontSize: 11, fontStyle: pw.FontStyle.italic)),
               pw.SizedBox(height: 8),
               pw.Text('Số sổ: $bookNumber', style: const pw.TextStyle(fontSize: 11)),
               pw.SizedBox(height: 24),
