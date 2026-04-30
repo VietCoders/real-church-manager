@@ -9,12 +9,6 @@
       "system": false,
       "schema": [
         {
-          "name": "name",
-          "type": "text",
-          "required": true,
-          "options": {"max": 200}
-        },
-        {
           "name": "role",
           "type": "select",
           "required": true,
@@ -28,12 +22,6 @@
           "type": "relation",
           "required": false,
           "options": {"collectionId": "members", "cascadeDelete": false, "maxSelect": 1}
-        },
-        {
-          "name": "avatar",
-          "type": "file",
-          "required": false,
-          "options": {"maxSize": 5242880, "mimeTypes": ["image/jpeg", "image/png", "image/webp"], "maxSelect": 1}
         }
       ],
       "indexes": [],

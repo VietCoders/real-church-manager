@@ -9,10 +9,8 @@ migrate((db) => {
 
   // Extend default users auth collection với role/member_id/name/avatar.
   const usersCol = dao.findCollectionByNameOrId('users');
-  usersCol.schema.addField(new SchemaField({"name":"name","type":"text","required":true,"options":{"max":200}}));
   usersCol.schema.addField(new SchemaField({"name":"role","type":"select","required":true,"options":{"maxSelect":1,"values":["priest_pastor","priest_assistant","secretary","council_member","guest"]}}));
   usersCol.schema.addField(new SchemaField({"name":"member_id","type":"relation","required":false,"options":{"collectionId":"rcm_members0000","cascadeDelete":false,"maxSelect":1}}));
-  usersCol.schema.addField(new SchemaField({"name":"avatar","type":"file","required":false,"options":{"maxSize":5242880,"mimeTypes":["image/jpeg","image/png","image/webp"],"maxSelect":1}}));
   usersCol.listRule = "@request.auth.role = \"priest_pastor\"";
   usersCol.viewRule = "@request.auth.id != \"\"";
   usersCol.createRule = "@request.auth.role = \"priest_pastor\"";
