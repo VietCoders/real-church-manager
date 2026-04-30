@@ -1,6 +1,5 @@
 // District repository.
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:pocketbase/pocketbase.dart';
 
 import '../../core/logging/logger.dart';
 import '../../domain/district/entity.dart';
