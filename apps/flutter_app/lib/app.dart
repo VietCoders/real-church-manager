@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'design/theme.dart';
+import 'features/auth/change_password_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/member/list_screen.dart';
 import 'features/settings/connection_screen.dart';
@@ -15,16 +16,22 @@ final realCmRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
-      final loggingIn = state.matchedLocation == '/login';
-      final connecting = state.matchedLocation == '/setup';
+      final loc = state.matchedLocation;
+      final connecting = loc == '/setup';
+      final loggingIn = loc == '/login';
+      final changing = loc == '/change-password';
+
       if (!auth.hasBackend) return connecting ? null : '/setup';
       if (!auth.isAuthenticated) return loggingIn ? null : '/login';
-      if (loggingIn || connecting) return '/';
+      // Đăng nhập rồi nhưng phải đổi mật khẩu lần đầu → ép vào /change-password.
+      if (auth.mustChangePassword) return changing ? null : '/change-password';
+      if (loggingIn || connecting || changing) return '/';
       return null;
     },
     routes: [
       GoRoute(path: '/setup', builder: (_, __) => const ConnectionScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(path: '/change-password', builder: (_, __) => const ChangePasswordScreen()),
       GoRoute(path: '/', builder: (_, __) => const MemberListScreen()),
     ],
   );
