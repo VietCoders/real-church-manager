@@ -43,3 +43,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Flutter/CocoaPods auto-generated (per-machine)
+/macos/Flutter/ephemeral/
+/macos/Pods/
+/macos/.symlinks/
+/ios/Flutter/ephemeral/
+/ios/Pods/
+/ios/.symlinks/
+/linux/flutter/ephemeral/
+/windows/flutter/ephemeral/
+.flutter-plugins
+.flutter-plugins-dependencies
