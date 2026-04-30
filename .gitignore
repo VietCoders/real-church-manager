@@ -1,0 +1,80 @@
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials.json
+
+# Flutter
+**/.dart_tool/
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/build/
+**/ios/Pods/
+**/ios/.symlinks/
+**/android/.gradle/
+**/android/captures/
+**/android/local.properties
+**/android/key.properties
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.metadata
+**/Generated.xcconfig
+**/Flutter/Flutter.podspec
+**/macos/Pods/
+**/macos/Flutter/ephemeral/
+**/windows/flutter/ephemeral/
+**/linux/flutter/ephemeral/
+*.iml
+*.lock
+!pubspec.lock
+
+# PocketBase data (per-deployment, never commit)
+backend/pb_data/
+backend/pocketbase
+backend/pocketbase.exe
+
+# Build artifacts (release qua GitHub Releases, không commit)
+dist/
+out/
+*.zip
+*.dmg
+*.exe
+*.apk
+*.aab
+*.ipa
+
+# Logs
+*.log
+logs/
+
+# Backup
+*.bak
+*.backup
+
+# Runtime scratch
+temp/
+tmp/
+.tmp/
+
+# Coverage
+coverage/
+*.lcov
+
+# Node (cho tooling scripts nếu có)
+node_modules/
+.pnpm-store/
