@@ -92,7 +92,7 @@ class RealCmCertificateBuilder {
               ),
               pw.SizedBox(height: 16),
               pw.Text('Cấp ngày ${df.format(DateTime.now())}',
-                  style: const pw.TextStyle(fontSize: 10, fontStyle: pw.FontStyle.italic)),
+                  style: pw.TextStyle(fontSize: 10, fontStyle: pw.FontStyle.italic)),
             ],
           ),
         ),
