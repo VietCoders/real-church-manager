@@ -11,6 +11,8 @@ import '../../design/icons.dart';
 import '../../design/tokens.dart';
 import '../../platform/pocketbase/auth.dart';
 import '../../platform/pocketbase/client.dart';
+import '../../platform/sync/queue.dart';
+import '../../platform/sync/safe_write.dart';
 import '../scaffold/app_shell.dart';
 import '../modal/service.dart';
 import '../toast/service.dart';
