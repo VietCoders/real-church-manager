@@ -86,4 +86,6 @@ class CollectionConfig {
   final String? expand;
   /// True = update deleted_at instead of DELETE physical.
   final bool softDelete;
+  /// Khi set, list hiển thị thêm action "In chứng chỉ" cho mỗi record.
+  final CertificatePrinter? onPrintCertificate;
 }
