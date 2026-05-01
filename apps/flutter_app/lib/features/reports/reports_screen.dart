@@ -219,6 +219,25 @@ class _OverviewReport extends ConsumerWidget {
           MapEntry('An Táng $yr', '${d[5]}'),
         ], caption: 'Năm $yr', chartType: ReportChartType.bar);
       },
+      onExportExcel: () async {
+        final d = await Future.wait([
+          repo.totalActiveMembers(),
+          repo.totalFamilies(),
+          repo.totalDistricts(),
+          repo.baptismsThisYear(),
+          repo.marriagesThisYear(),
+          repo.funeralsThisYear(),
+        ]);
+        if (!context.mounted) return;
+        await _exportReportExcel(context, 'Tổng quan giáo xứ', [
+          MapEntry('Giáo dân', '${d[0]}'),
+          MapEntry('Gia đình', '${d[1]}'),
+          MapEntry('Giáo họ', '${d[2]}'),
+          MapEntry('Rửa Tội $yr', '${d[3]}'),
+          MapEntry('Hôn Phối $yr', '${d[4]}'),
+          MapEntry('An Táng $yr', '${d[5]}'),
+        ], caption: 'Năm $yr');
+      },
       child: FutureBuilder(
         future: Future.wait([
           repo.totalActiveMembers(),
