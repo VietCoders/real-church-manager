@@ -94,19 +94,31 @@ function writeLog(app, op, collection, record, authId, changes) {
 for (const colName of TRACKED) {
   onRecordAfterCreateRequest((e) => {
     const auth = e.httpContext && e.httpContext.get('authRecord');
-    writeLog(e.app, 'create', colName, e.record, auth ? auth.id : null);
+    writeLog(e.app, 'create', colName, e.record, auth ? auth.id : null, null);
+    e.next();
+  }, colName);
+
+  // Snapshot trước update để diff
+  onRecordBeforeUpdateRequest((e) => {
+    try {
+      _beforeCache.set(e.record.id, snapshotRecord(e.record));
+    } catch (_) {}
     e.next();
   }, colName);
 
   onRecordAfterUpdateRequest((e) => {
     const auth = e.httpContext && e.httpContext.get('authRecord');
-    writeLog(e.app, 'update', colName, e.record, auth ? auth.id : null);
+    const before = _beforeCache.get(e.record.id);
+    _beforeCache.delete(e.record.id);
+    const after = snapshotRecord(e.record);
+    const changes = diffRecords(before, after);
+    writeLog(e.app, 'update', colName, e.record, auth ? auth.id : null, changes);
     e.next();
   }, colName);
 
   onRecordAfterDeleteRequest((e) => {
     const auth = e.httpContext && e.httpContext.get('authRecord');
-    writeLog(e.app, 'delete', colName, e.record, auth ? auth.id : null);
+    writeLog(e.app, 'delete', colName, e.record, auth ? auth.id : null, null);
     e.next();
   }, colName);
 }
