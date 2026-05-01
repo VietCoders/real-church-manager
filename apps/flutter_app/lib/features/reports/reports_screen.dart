@@ -622,6 +622,17 @@ class _DonationSummaryReportState extends ConsumerState<_DonationSummaryReport> 
           ..add(MapEntry('Số dư', '${fmt.format(totalIn - totalOut)} đ'));
         await _exportReportPdf(context, 'Tổng thu chi', rows, caption: 'Năm $_year', chartType: ReportChartType.pie);
       },
+      onExportExcel: () async {
+        final m = await _load();
+        if (!context.mounted) return;
+        num totalIn = 0, totalOut = 0;
+        m.forEach((k, v) { if (k == 'expense') { totalOut += v; } else { totalIn += v; } });
+        final rows = m.entries.map((e) => MapEntry(_typeLabel(e.key), '${fmt.format(e.value)} đ')).toList()
+          ..add(MapEntry('Tổng thu', '${fmt.format(totalIn)} đ'))
+          ..add(MapEntry('Tổng chi', '${fmt.format(totalOut)} đ'))
+          ..add(MapEntry('Số dư', '${fmt.format(totalIn - totalOut)} đ'));
+        await _exportReportExcel(context, 'Tổng thu chi', rows, caption: 'Năm $_year');
+      },
       child: FutureBuilder<Map<String, num>>(
         future: _future,
         builder: (ctx, snap) {
