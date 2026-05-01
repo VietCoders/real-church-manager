@@ -1,6 +1,8 @@
 // Member repository — wrap PocketBase + Hive cache + realtime subscription.
 import 'dart:async';
+import 'dart:io';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:pocketbase/pocketbase.dart';
 
 import '../../core/logging/logger.dart';
