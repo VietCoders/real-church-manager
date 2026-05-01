@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'design/theme.dart';
+import 'features/admin/user_management_screen.dart';
 import 'features/auth/change_password_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/calendar/calendar_screen.dart';
@@ -14,8 +15,10 @@ import 'features/modules/configs.dart' as cfg;
 import 'features/reports/reports_screen.dart';
 import 'features/settings/connection_screen.dart';
 import 'features/settings/parish_settings_screen.dart';
+import 'features/settings/preferences_screen.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'platform/pocketbase/auth.dart';
+import 'platform/storage/preferences.dart';
 import 'ui/crud/collection_crud.dart';
 
 final realCmRouterProvider = Provider<GoRouter>((ref) {
@@ -39,14 +42,14 @@ final realCmRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/change-password', builder: (_, __) => const ChangePasswordScreen()),
       GoRoute(path: '/', builder: (_, __) => const DashboardScreen()),
 
-      // Module có CRUD UI riêng
       GoRoute(path: '/members', builder: (_, __) => const MemberListScreen()),
       GoRoute(path: '/districts', builder: (_, __) => const DistrictListScreen()),
       GoRoute(path: '/settings', builder: (_, __) => const ParishSettingsScreen()),
+      GoRoute(path: '/preferences', builder: (_, __) => const PreferencesScreen()),
+      GoRoute(path: '/users', builder: (_, __) => const UserManagementScreen()),
       GoRoute(path: '/calendar', builder: (_, __) => const LiturgicalCalendarScreen()),
       GoRoute(path: '/reports', builder: (_, __) => const ReportsScreen()),
 
-      // Module dùng generic CollectionCrudScreen với config
       GoRoute(path: '/families', builder: (_, __) => CollectionCrudScreen(config: cfg.familyConfig)),
       GoRoute(path: '/sacrament/baptism', builder: (_, __) => CollectionCrudScreen(config: cfg.baptismConfig)),
       GoRoute(path: '/sacrament/confirmation', builder: (_, __) => CollectionCrudScreen(config: cfg.confirmationConfig)),
@@ -66,15 +69,17 @@ class RealCmApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(realCmRouterProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
     return MaterialApp.router(
       onGenerateTitle: (ctx) => AppLocalizations.of(ctx)!.appTitle,
       theme: RealCmTheme.light(),
       darkTheme: RealCmTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       routerConfig: router,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('vi'),
+      locale: locale,
       debugShowCheckedModeBanner: false,
     );
   }
