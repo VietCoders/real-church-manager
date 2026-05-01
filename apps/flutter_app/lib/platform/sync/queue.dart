@@ -149,3 +149,38 @@ class RealCmSyncQueue {
 
 /// Riverpod provider để UI watch số pending.
 final pendingSyncCountProvider = StateProvider<int>((_) => RealCmSyncQueue.instance.pendingCount());
+
+class PendingItemView {
+  PendingItemView({required this.id, required this.collection, required this.op, this.recordId, this.body});
+  final String id;
+  final String collection;
+  final SyncOp op;
+  final String? recordId;
+  final Map<String, dynamic>? body;
+}
+
+extension RealCmSyncQueueQuery on RealCmSyncQueue {
+  List<PendingItemView> listPending() {
+    final box = RealCmStorageAdapter.offlineQueue();
+    final items = <PendingItemView>[];
+    for (final key in box.keys) {
+      final raw = box.get(key);
+      if (raw is! Map) continue;
+      try {
+        final m = Map<String, dynamic>.from(raw);
+        items.add(PendingItemView(
+          id: m['id'].toString(),
+          collection: m['collection'].toString(),
+          op: SyncOp.values.firstWhere((e) => e.name == m['op'], orElse: () => SyncOp.update),
+          recordId: m['record_id'] as String?,
+          body: (m['body'] as Map?)?.cast<String, dynamic>(),
+        ));
+      } catch (_) {}
+    }
+    return items;
+  }
+
+  Future<void> removeItem(String id) async {
+    await RealCmStorageAdapter.offlineQueue().delete(id);
+  }
+}
