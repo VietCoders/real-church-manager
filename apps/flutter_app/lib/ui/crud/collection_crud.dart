@@ -298,9 +298,9 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
                       onTap: canEdit ? () => _showForm(existing: r) : null,
                     );
                   },
-                );
-              },
-            ),
+                ),
+              );
+            }),
           ),
         ],
       ),
