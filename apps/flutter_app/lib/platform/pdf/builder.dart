@@ -119,7 +119,8 @@ class RealCmCertificateBuilder {
       bookNumber: data['book_number']?.toString() ?? '',
       rows: [
         ('Họ và tên bệnh nhân', memberFullName),
-        ('Lý do', data['reason']?.toString() ?? ''),
+        if ((data['condition']?.toString() ?? '').isNotEmpty)
+          ('Tình trạng', data['condition']?.toString() ?? ''),
         _divider,
         ('Đã được xức dầu ngày', _date(data['anointing_date'])),
         ('Tại', data['anointing_place']?.toString() ?? ''),
