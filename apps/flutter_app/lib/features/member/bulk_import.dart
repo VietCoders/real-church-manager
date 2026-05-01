@@ -49,7 +49,7 @@ class _MemberBulkImportScreenState extends ConsumerState<MemberBulkImportScreen>
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['xlsx', 'csv'],
+        allowedExtensions: const ['xlsx', 'csv'],
       );
       if (result == null || result.files.isEmpty) return;
       final file = result.files.first;
