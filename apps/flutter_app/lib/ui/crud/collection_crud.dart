@@ -147,6 +147,25 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
     }
   }
 
+  Future<void> _restore(RecordModel rec) async {
+    try {
+      final pb = RealCmPocketBase.instance();
+      await safePbUpdate(pb, widget.config.collection, rec.id, {'deleted_at': null});
+      if (mounted) {
+        realCmToast(context, 'Đã khôi phục', type: RealCmToastType.success);
+        _refresh();
+      }
+    } on OfflineQueuedException catch (e) {
+      ref.read(pendingSyncCountProvider.notifier).state = RealCmSyncQueue.instance.pendingCount();
+      if (mounted) {
+        realCmToast(context, e.message, type: RealCmToastType.warning);
+        _refresh();
+      }
+    } catch (e) {
+      if (mounted) realCmToast(context, 'Lỗi khôi phục: $e', type: RealCmToastType.error);
+    }
+  }
+
   Future<void> _delete(RecordModel rec) async {
     final ok = await realCmConfirm(
       context,
