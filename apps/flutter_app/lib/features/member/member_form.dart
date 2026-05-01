@@ -173,9 +173,17 @@ class _MemberFormDialogState extends ConsumerState<MemberFormDialog> {
       }..removeWhere((_, v) => v == null || (v is String && v.isEmpty));
 
       final repo = ref.read(memberRepoProvider);
-      final result = widget.existing == null
+      var result = widget.existing == null
           ? await repo.create(data)
           : await repo.update(widget.existing!.id, data);
+      // Upload pending photo nếu vừa create
+      if (_pendingPhoto != null) {
+        try {
+          result = await repo.uploadPhoto(result.id, _pendingPhoto!);
+        } catch (e) {
+          if (mounted) realCmToast(context, 'Đã lưu giáo dân nhưng upload ảnh thất bại: $e', type: RealCmToastType.warning);
+        }
+      }
       if (mounted) {
         realCmToast(context,
             widget.existing == null ? 'Đã thêm giáo dân ${result.displayName}' : 'Đã cập nhật ${result.displayName}',
