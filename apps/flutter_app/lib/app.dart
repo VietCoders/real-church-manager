@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'design/theme.dart';
+import 'features/admin/activity_log_screen.dart';
 import 'features/admin/user_management_screen.dart';
 import 'features/auth/change_password_screen.dart';
 import 'features/auth/login_screen.dart';
