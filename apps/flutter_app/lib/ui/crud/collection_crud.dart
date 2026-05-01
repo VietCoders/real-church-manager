@@ -142,7 +142,11 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => CrudFormDialogPublic(config: widget.config, existing: existing),
+      builder: (_) => CrudFormDialogPublic(
+        config: widget.config,
+        existing: existing,
+        defaults: widget.config.defaults.isNotEmpty ? widget.config.defaults : null,
+      ),
     );
     if (result == true) {
       if (mounted) realCmToast(context, existing == null ? 'Đã thêm ${widget.config.itemSingular}' : 'Đã cập nhật', type: RealCmToastType.success);
