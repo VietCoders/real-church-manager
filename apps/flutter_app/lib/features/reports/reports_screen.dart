@@ -25,7 +25,13 @@ Future<String> _fetchParishName() async {
   }
 }
 
-Future<void> _exportReportPdf(BuildContext ctx, String title, List<MapEntry<String, String>> rows, {String? caption}) async {
+Future<void> _exportReportPdf(
+  BuildContext ctx,
+  String title,
+  List<MapEntry<String, String>> rows, {
+  String? caption,
+  ReportChartType chartType = ReportChartType.none,
+}) async {
   try {
     final parishName = await _fetchParishName();
     final doc = await RealCmReportPdfBuilder.simpleTable(
@@ -33,6 +39,7 @@ Future<void> _exportReportPdf(BuildContext ctx, String title, List<MapEntry<Stri
       title: title,
       caption: caption,
       rows: rows,
+      chartType: chartType,
     );
     await RealCmReportPdfBuilder.print(doc, jobName: title);
   } catch (e) {
