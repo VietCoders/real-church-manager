@@ -87,7 +87,11 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
   Widget build(BuildContext context) {
     final auth = ref.watch(realCmAuthProvider);
     final canEdit = auth.canEditMembers;
-    final asyncList = ref.watch(_memberListProvider(_search.isEmpty ? null : _search));
+    final query = _MemberListQuery(
+      search: _search.isEmpty ? null : _search,
+      status: _statusFilter,
+    );
+    final asyncList = ref.watch(_memberListProvider(query));
     final df = DateFormat('dd/MM/yyyy', 'vi');
 
     return RealCmAppShell(
