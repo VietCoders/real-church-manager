@@ -136,7 +136,20 @@ class _MemberBulkImportScreenState extends ConsumerState<MemberBulkImportScreen>
       for (var j = 0; j < headers.length && j < cells.length; j++) {
         final v = cells[j]?.value;
         if (v == null) continue;
-        final s = v is DateTime ? DateFormat('dd/MM/yyyy').format(v) : v.toString();
+        String s;
+        if (v is DateCellValue) {
+          s = '${v.day.toString().padLeft(2, '0')}/${v.month.toString().padLeft(2, '0')}/${v.year}';
+        } else if (v is TextCellValue) {
+          s = v.value.text ?? '';
+        } else if (v is IntCellValue) {
+          s = v.value.toString();
+        } else if (v is DoubleCellValue) {
+          s = v.value.toString();
+        } else if (v is BoolCellValue) {
+          s = v.value.toString();
+        } else {
+          s = v.toString();
+        }
         raw[_normalizeHeader(headers[j])] = s.trim();
       }
       if ((raw['full_name'] ?? '').isEmpty) continue;
