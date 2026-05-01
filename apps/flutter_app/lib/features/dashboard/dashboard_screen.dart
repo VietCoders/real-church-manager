@@ -1,14 +1,65 @@
 // Dashboard screen — view mode wrap qua RealCmAppShell (responsive sidebar).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../data/dashboard/repository.dart';
 import '../../design/icons.dart';
 import '../../design/tokens.dart';
 import '../../domain/dashboard/widget_spec.dart';
+import '../../platform/pocketbase/auth.dart';
+import '../../platform/pocketbase/client.dart';
+import '../../platform/storage/adapter.dart';
 import '../../ui/scaffold/app_shell.dart';
 import 'customize_screen.dart';
 import 'widget_registry.dart';
+
+const _kOnboardingDismissedKey = 'onboarding.dismissed';
+
+/// Check parish_settings rỗng và đề xuất onboarding cho priest_pastor.
+Future<void> _maybeShowOnboarding(BuildContext context, WidgetRef ref) async {
+  final auth = ref.read(realCmAuthProvider);
+  if (!auth.isPriestPastor) return;
+  final box = RealCmStorageAdapter.settings();
+  if ((box.get(_kOnboardingDismissedKey) as bool?) ?? false) return;
+  try {
+    final pb = RealCmPocketBase.instance();
+    final list = await pb.collection('parish_settings').getList(page: 1, perPage: 1);
+    if (list.items.isNotEmpty) return; // đã có config
+    if (!context.mounted) return;
+    // Hiển thị banner suggest onboarding
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(RealCmIcons.parish, size: 40, color: RealCmColors.primary),
+        title: const Text('Chào mừng tới Real Church Manager'),
+        content: const Text(
+          'Đây là lần đầu mở app. Bạn có muốn cấu hình thông tin giáo xứ ngay?\n\n'
+          'Cha xứ + tên giáo xứ sẽ hiển thị trên chứng chỉ Bí Tích.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await box.put(_kOnboardingDismissedKey, true);
+              if (ctx.mounted) Navigator.of(ctx).pop();
+            },
+            child: const Text('Để sau'),
+          ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text('Cấu hình ngay'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              ctx.push('/onboarding');
+            },
+          ),
+        ],
+      ),
+    );
+  } catch (_) {
+    // Bỏ qua nếu không kết nối được — sẽ check lại lần sau
+  }
+}
 
 final dashboardRepoProvider = Provider((_) => DashboardLayoutRepository());
 
