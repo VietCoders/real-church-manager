@@ -32,6 +32,7 @@ final baptismConfig = CollectionConfig(
   primaryDisplay: (d) => d['book_number']?.toString().isNotEmpty == true ? 'Số sổ ${d['book_number']}' : 'Rửa Tội (chưa có số sổ)',
   secondaryDisplay: (d) => '${_date(d['baptism_date'])} · Cha: ${d['priest_name'] ?? ''}',
   sort: '-baptism_date',
+  onPrintCertificate: printBaptismCertificate,
   fields: const [
     CrudFieldConfig(name: 'book_number', label: 'Số sổ', section: 'Thông tin chung', helper: 'Để trống = tự sinh RT-YYYY-NNNN', flex: 1),
     CrudFieldConfig(name: 'baptism_date', label: 'Ngày rửa tội', type: CrudFieldType.date, required: true, section: 'Thông tin chung', flex: 1),
