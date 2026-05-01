@@ -26,9 +26,20 @@ class CollectionCrudScreen extends ConsumerStatefulWidget {
 }
 
 class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
+  static const _perPage = 50;
+  static const _debounce = Duration(milliseconds: 300);
+
   String _search = '';
   late final TextEditingController _searchCtrl;
-  Future<List<RecordModel>>? _future;
+  Timer? _debounceTimer;
+
+  final List<RecordModel> _items = [];
+  int _page = 1;
+  int _totalPages = 1;
+  bool _loading = false;
+  bool _loadingMore = false;
+  Object? _error;
+
   Future<void> Function()? _unsubscribe;
 
   @override
@@ -44,43 +55,78 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
       final pb = RealCmPocketBase.instance();
       _unsubscribe = await pb.collection(widget.config.collection).subscribe('*', (e) {
         if (!mounted) return;
-        // Reload trên mọi event create/update/delete để keep list nhất quán
         _refresh();
       });
-    } catch (_) {
-      // Server có thể chưa hỗ trợ SSE hoặc đang offline — bỏ qua, list vẫn hoạt động
-    }
+    } catch (_) {}
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchCtrl.dispose();
     _unsubscribe?.call();
     super.dispose();
   }
 
-  void _refresh() {
-    setState(() {
-      _future = _load();
+  void _onSearchChanged(String value) {
+    _search = value;
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(_debounce, () {
+      if (mounted) _refresh();
     });
   }
 
-  Future<List<RecordModel>> _load() async {
-    final pb = RealCmPocketBase.instance();
-    final filters = <String>[];
-    if (widget.config.softDelete) filters.add('deleted_at = null');
-    if (_search.trim().isNotEmpty) {
-      final q = _search.replaceAll('"', '');
-      final fieldFilters = widget.config.searchFields.map((f) => '$f ~ "$q"').join(' || ');
-      if (fieldFilters.isNotEmpty) filters.add('($fieldFilters)');
+  Future<void> _refresh() async {
+    if (!mounted) return;
+    setState(() {
+      _items.clear();
+      _page = 1;
+      _loading = true;
+      _error = null;
+    });
+    await _loadPage(reset: true);
+  }
+
+  Future<void> _loadMore() async {
+    if (_loadingMore || _loading || _page >= _totalPages) return;
+    setState(() => _loadingMore = true);
+    _page++;
+    await _loadPage(reset: false);
+  }
+
+  Future<void> _loadPage({required bool reset}) async {
+    try {
+      final pb = RealCmPocketBase.instance();
+      final filters = <String>[];
+      if (widget.config.softDelete) filters.add('deleted_at = null');
+      if (_search.trim().isNotEmpty) {
+        final q = _search.replaceAll('"', '');
+        final fieldFilters = widget.config.searchFields.map((f) => '$f ~ "$q"').join(' || ');
+        if (fieldFilters.isNotEmpty) filters.add('($fieldFilters)');
+      }
+      final res = await pb.collection(widget.config.collection).getList(
+        page: _page,
+        perPage: _perPage,
+        filter: filters.isEmpty ? null : filters.join(' && '),
+        sort: widget.config.sort,
+        expand: widget.config.expand,
+      );
+      if (!mounted) return;
+      setState(() {
+        if (reset) _items.clear();
+        _items.addAll(res.items);
+        _totalPages = res.totalPages;
+        _loading = false;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e;
+        _loading = false;
+        _loadingMore = false;
+      });
     }
-    final res = await pb.collection(widget.config.collection).getList(
-      page: 1, perPage: 200,
-      filter: filters.isEmpty ? null : filters.join(' && '),
-      sort: widget.config.sort,
-      expand: widget.config.expand,
-    );
-    return res.items;
   }
 
   Future<void> _showForm({RecordModel? existing}) async {
