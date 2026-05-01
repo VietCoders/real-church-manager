@@ -128,7 +128,7 @@ class _Sidebar extends StatelessWidget {
   List<Widget> _buildItems(BuildContext context) {
     final items = <Widget>[];
     String? lastSection;
-    for (final dest in realCmDestinations) {
+    for (final dest in realCmDestinationsFor(role)) {
       if (dest.section != null && dest.section != lastSection) {
         if (expanded) {
           items.add(Padding(
