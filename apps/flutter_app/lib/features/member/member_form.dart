@@ -71,6 +71,59 @@ class _MemberFormDialogState extends ConsumerState<MemberFormDialog> {
     _gender = m?.gender;
     _birthDate = m?.birthDate;
     _status = m?.status ?? RealCmMemberStatus.active;
+    _photoFilename = m?.photo;
+  }
+
+  Future<void> _pickPhoto(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+      if (picked == null) return;
+      final file = File(picked.path);
+      // Nếu đang sửa member existing → upload luôn để có thumbnail ngay
+      if (widget.existing != null) {
+        setState(() => _uploadingPhoto = true);
+        try {
+          final updated = await ref.read(memberRepoProvider).uploadPhoto(widget.existing!.id, file);
+          setState(() {
+            _photoFilename = updated.photo;
+            _pendingPhoto = null;
+          });
+          if (mounted) realCmToast(context, 'Đã cập nhật ảnh', type: RealCmToastType.success);
+        } catch (e) {
+          if (mounted) realCmToast(context, 'Tải ảnh thất bại: $e', type: RealCmToastType.error);
+        } finally {
+          if (mounted) setState(() => _uploadingPhoto = false);
+        }
+      } else {
+        // Member chưa tạo — giữ file pending, upload sau khi create
+        setState(() => _pendingPhoto = file);
+      }
+    } catch (e) {
+      if (mounted) realCmToast(context, 'Không thể chọn ảnh: $e', type: RealCmToastType.error);
+    }
+  }
+
+  Future<void> _removePhoto() async {
+    if (widget.existing == null) {
+      setState(() => _pendingPhoto = null);
+      return;
+    }
+    final ok = await realCmConfirm(context,
+        title: 'Xoá ảnh', body: 'Xác nhận xoá ảnh giáo dân này?', danger: true);
+    if (!ok) return;
+    try {
+      final updated = await ref.read(memberRepoProvider).removePhoto(widget.existing!.id);
+      setState(() => _photoFilename = updated.photo);
+      if (mounted) realCmToast(context, 'Đã xoá ảnh', type: RealCmToastType.success);
+    } catch (e) {
+      if (mounted) realCmToast(context, 'Lỗi xoá ảnh: $e', type: RealCmToastType.error);
+    }
   }
 
   @override
