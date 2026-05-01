@@ -437,7 +437,7 @@ class _SacramentYearReportState extends ConsumerState<_SacramentYearReport> {
         if (!context.mounted) return;
         await _exportReportPdf(context, 'Bí Tích theo năm',
           List.generate(labels.length, (i) => MapEntry(labels[i], '${d[i]}')),
-          caption: 'Năm $_year');
+          caption: 'Năm $_year', chartType: ReportChartType.bar);
       },
       child: FutureBuilder<List<int>>(
         future: _future,
