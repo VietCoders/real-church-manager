@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import '../../design/icons.dart';
 import '../../design/tokens.dart';
 import '../../features/auth/connection_logout_actions.dart';
+import '../../platform/health/health_monitor.dart';
 import '../../platform/pocketbase/auth.dart';
 import '../../platform/sync/queue.dart';
 import '../toast/service.dart';
