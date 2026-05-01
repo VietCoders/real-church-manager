@@ -126,6 +126,12 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
       title: 'Danh sách giáo dân',
       actions: [
         IconButton(
+          icon: Icon(_showDeleted ? Icons.restore_from_trash : Icons.delete_outline),
+          tooltip: _showDeleted ? 'Đang xem giáo dân đã xoá' : 'Xem giáo dân đã xoá',
+          color: _showDeleted ? RealCmColors.warning : null,
+          onPressed: () => setState(() => _showDeleted = !_showDeleted),
+        ),
+        IconButton(
           icon: const Icon(Icons.table_view),
           tooltip: 'Xuất toàn bộ ra Excel',
           onPressed: () => exportMembersToExcel(context),
