@@ -50,6 +50,9 @@ class _MemberFormDialogState extends ConsumerState<MemberFormDialog> {
   DateTime? _birthDate;
   RealCmMemberStatus _status = RealCmMemberStatus.active;
   bool _saving = false;
+  File? _pendingPhoto; // ảnh chọn nhưng chưa upload (dùng cho create)
+  String? _photoFilename; // filename hiện trong DB (existing member)
+  bool _uploadingPhoto = false;
 
   @override
   void initState() {
