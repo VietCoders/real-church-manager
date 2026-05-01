@@ -638,7 +638,7 @@ class _MassIntentionsReport extends ConsumerWidget {
         final total = m.values.fold<int>(0, (s, v) => s + v);
         final rows = m.entries.map((e) => MapEntry(labels[e.key]!, '${e.value}')).toList()
           ..add(MapEntry('Tổng', '$total'));
-        await _exportReportPdf(context, 'Lễ ý cầu nguyện', rows);
+        await _exportReportPdf(context, 'Lễ ý cầu nguyện', rows, chartType: ReportChartType.pie);
       },
       child: FutureBuilder<Map<String, int>>(
         future: _load(),
