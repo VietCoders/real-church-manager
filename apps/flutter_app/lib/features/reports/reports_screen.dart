@@ -13,6 +13,7 @@ import '../../design/tokens.dart';
 import '../../platform/excel/exporter.dart';
 import '../../platform/pdf/report_builder.dart';
 import '../../platform/pocketbase/client.dart';
+import '../../ui/pdf/preview_screen.dart';
 import '../../ui/scaffold/app_shell.dart';
 import '../../ui/toast/service.dart';
 
