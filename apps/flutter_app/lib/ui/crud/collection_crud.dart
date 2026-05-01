@@ -27,17 +27,33 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
   String _search = '';
   late final TextEditingController _searchCtrl;
   Future<List<RecordModel>>? _future;
+  Future<void> Function()? _unsubscribe;
 
   @override
   void initState() {
     super.initState();
     _searchCtrl = TextEditingController();
     _refresh();
+    _subscribeRealtime();
+  }
+
+  Future<void> _subscribeRealtime() async {
+    try {
+      final pb = RealCmPocketBase.instance();
+      _unsubscribe = await pb.collection(widget.config.collection).subscribe('*', (e) {
+        if (!mounted) return;
+        // Reload trên mọi event create/update/delete để keep list nhất quán
+        _refresh();
+      });
+    } catch (_) {
+      // Server có thể chưa hỗ trợ SSE hoặc đang offline — bỏ qua, list vẫn hoạt động
+    }
   }
 
   @override
   void dispose() {
     _searchCtrl.dispose();
+    _unsubscribe?.call();
     super.dispose();
   }
 
