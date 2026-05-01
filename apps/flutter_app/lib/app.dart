@@ -34,6 +34,9 @@ final realCmRouterProvider = Provider<GoRouter>((ref) {
       if (!auth.isAuthenticated) return loggingIn ? null : '/login';
       if (auth.mustChangePassword) return changing ? null : '/change-password';
       if (loggingIn || connecting || changing) return '/';
+      // Permission guard: route nào yêu cầu role cụ thể, redirect về / nếu role không khớp.
+      final dest = realCmDestinations.where((d) => loc == d.route || (d.route != '/' && loc.startsWith(d.route))).firstOrNull;
+      if (dest != null && !dest.isVisibleFor(auth.role ?? 'guest')) return '/';
       return null;
     },
     routes: [
