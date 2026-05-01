@@ -44,8 +44,9 @@ const List<RealCmNavDestination> realCmDestinations = [
   RealCmNavDestination(route: '/groups', icon: RealCmIcons.group, label: 'Đoàn thể', section: 'Mục vụ'),
   RealCmNavDestination(route: '/mass', icon: RealCmIcons.mass, label: 'Lễ ý cầu nguyện', section: 'Mục vụ'),
   RealCmNavDestination(route: '/calendar', icon: RealCmIcons.calendar, label: 'Lịch phụng vụ', section: 'Mục vụ'),
-  RealCmNavDestination(route: '/donations', icon: RealCmIcons.donation, label: 'Sổ thu chi', section: 'Mục vụ', requiredRoles: _priestOnly),
-  RealCmNavDestination(route: '/reports', icon: RealCmIcons.report, label: 'Báo cáo', section: 'Mục vụ'),
+  RealCmNavDestination(route: '/income', icon: Icons.arrow_circle_up, label: 'Sổ Thu', section: 'Tài chính', requiredRoles: _priestOnly),
+  RealCmNavDestination(route: '/expense', icon: Icons.arrow_circle_down, label: 'Sổ Chi', section: 'Tài chính', requiredRoles: _priestOnly),
+  RealCmNavDestination(route: '/reports', icon: RealCmIcons.report, label: 'Báo cáo', section: 'Tài chính'),
 
   RealCmNavDestination(route: '/settings', icon: RealCmIcons.settings, label: 'Cấu hình giáo xứ', section: 'Hệ thống', requiredRoles: _priestPastorOnly),
   RealCmNavDestination(route: '/users', icon: RealCmIcons.user, label: 'Quản lý người dùng', section: 'Hệ thống', requiredRoles: _priestPastorOnly),
