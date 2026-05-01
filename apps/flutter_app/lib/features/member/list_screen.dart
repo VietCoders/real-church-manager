@@ -16,8 +16,19 @@ import '../../ui/toast/service.dart';
 import 'bulk_export.dart';
 import 'member_form.dart';
 
-final _memberListProvider = FutureProvider.autoDispose.family<List<Member>, String?>(
-  (ref, search) => ref.read(memberRepoProvider).list(search: search),
+class _MemberListQuery {
+  const _MemberListQuery({this.search, this.status});
+  final String? search;
+  final String? status;
+
+  @override
+  bool operator ==(Object other) => other is _MemberListQuery && other.search == search && other.status == status;
+  @override
+  int get hashCode => Object.hash(search, status);
+}
+
+final _memberListProvider = FutureProvider.autoDispose.family<List<Member>, _MemberListQuery>(
+  (ref, q) => ref.read(memberRepoProvider).list(search: q.search, status: q.status),
 );
 
 class MemberListScreen extends ConsumerStatefulWidget {
@@ -29,6 +40,7 @@ class MemberListScreen extends ConsumerStatefulWidget {
 
 class _MemberListScreenState extends ConsumerState<MemberListScreen> {
   String _search = '';
+  String? _statusFilter = 'active'; // mặc định chỉ hiện active
   final _searchCtrl = TextEditingController();
 
   @override
