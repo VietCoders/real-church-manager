@@ -210,6 +210,16 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
     return RealCmAppShell(
       title: cfg.title,
       actions: [
+        if (cfg.softDelete)
+          IconButton(
+            icon: Icon(_showDeleted ? Icons.restore_from_trash : Icons.delete_outline),
+            tooltip: _showDeleted ? 'Đang xem mục đã xoá — chuyển về danh sách chính' : 'Xem mục đã xoá',
+            color: _showDeleted ? RealCmColors.warning : null,
+            onPressed: () {
+              setState(() => _showDeleted = !_showDeleted);
+              _refresh();
+            },
+          ),
         IconButton(icon: const Icon(RealCmIcons.refresh), tooltip: 'Làm mới', onPressed: _refresh),
       ],
       floatingActionButton: canEdit
