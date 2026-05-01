@@ -559,8 +559,11 @@ class _CrudFormDialogState extends ConsumerState<CrudFormDialogPublic> {
       case CrudFieldType.text:
         return TextFormField(
           controller: _ctrls[f.name],
-          decoration: InputDecoration(labelText: f.required ? '${f.label} *' : f.label, hintText: f.hint, helperText: f.helper),
+          decoration: _decoration(f),
           validator: f.required ? (v) => (v == null || v.trim().isEmpty) ? 'Bắt buộc' : null : null,
+          onChanged: (_) {
+            if (_fieldErrors.remove(f.name) != null) setState(() {});
+          },
         );
     }
   }
