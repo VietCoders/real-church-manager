@@ -82,6 +82,11 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
       title: 'Danh sách giáo dân',
       actions: [
         IconButton(
+          icon: const Icon(Icons.table_view),
+          tooltip: 'Xuất toàn bộ ra Excel',
+          onPressed: () => exportMembersToExcel(context),
+        ),
+        IconButton(
           icon: const Icon(RealCmIcons.refresh),
           tooltip: 'Làm mới',
           onPressed: () => ref.invalidate(_memberListProvider),
