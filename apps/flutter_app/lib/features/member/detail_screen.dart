@@ -87,9 +87,22 @@ final _detailProvider = FutureProvider.autoDispose.family<_DetailData, String>((
 
   sacraments.sort((a, b) => b.date.compareTo(a.date));
 
+  // Donations match theo full_name (đơn giản — backwards compat).
+  final donations = <RecordModel>[];
+  try {
+    final qName = member.fullName.replaceAll('"', '');
+    final res = await pb.collection('donations').getList(
+      page: 1, perPage: 50,
+      filter: 'donor_name ~ "$qName"',
+      sort: '-date',
+    );
+    donations.addAll(res.items);
+  } catch (_) {}
+
   return _DetailData(
     member: member,
     sacraments: sacraments,
+    donations: donations,
     familyName: familyName,
     districtName: districtName,
   );
