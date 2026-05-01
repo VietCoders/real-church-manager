@@ -105,6 +105,9 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
       if (widget.config.softDelete) {
         filters.add(_showDeleted ? 'deleted_at != null' : 'deleted_at = null');
       }
+      if (widget.config.extraFilter != null) {
+        filters.add('(${widget.config.extraFilter})');
+      }
       if (_search.trim().isNotEmpty) {
         final q = _search.replaceAll('"', '');
         final fieldFilters = widget.config.searchFields.map((f) => '$f ~ "$q"').join(' || ');
