@@ -396,6 +396,17 @@ class _ByGenderReport extends ConsumerWidget {
           MapEntry('Tổng', '$total'),
         ], chartType: ReportChartType.pie);
       },
+      onExportExcel: () async {
+        final m = await repo.membersByGender();
+        if (!context.mounted) return;
+        final total = (m['male']??0) + (m['female']??0) + (m['other']??0);
+        await _exportReportExcel(context, 'Giáo dân theo giới tính', [
+          MapEntry('Nam', '${m['male']??0}'),
+          MapEntry('Nữ', '${m['female']??0}'),
+          MapEntry('Khác', '${m['other']??0}'),
+          MapEntry('Tổng', '$total'),
+        ]);
+      },
       child: FutureBuilder(
         future: repo.membersByGender(),
         builder: (ctx, snap) {
