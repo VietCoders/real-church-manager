@@ -97,6 +97,42 @@ class MemberRepository {
     _log.info('Soft-delete giáo dân $id');
   }
 
+  /// Phát hiện trùng lặp giáo dân theo full_name + (birth_date hoặc saint_name).
+  /// Dùng khi tạo mới để cảnh báo user trước.
+  Future<List<Member>> findDuplicates({
+    required String fullName,
+    DateTime? birthDate,
+    String? saintName,
+    String? excludeId,
+  }) async {
+    if (fullName.trim().isEmpty) return [];
+    final pb = RealCmPocketBase.instance();
+    final q = fullName.replaceAll('"', '').trim();
+    final filters = <String>['deleted_at = null', 'full_name ~ "$q"'];
+    if (excludeId != null) filters.add('id != "$excludeId"');
+    final res = await pb.collection(_collection).getList(
+      page: 1,
+      perPage: 20,
+      filter: filters.join(' && '),
+      sort: 'full_name',
+    );
+    final candidates = res.items.map((r) => Member.fromJson(r.toJson())).toList();
+    // Lọc thêm theo birthDate hoặc saintName để giảm false positive
+    return candidates.where((m) {
+      final sameName = m.fullName.toLowerCase().trim() == fullName.toLowerCase().trim();
+      if (!sameName) return false;
+      if (birthDate != null && m.birthDate != null) {
+        return m.birthDate!.year == birthDate.year &&
+            m.birthDate!.month == birthDate.month &&
+            m.birthDate!.day == birthDate.day;
+      }
+      if (saintName != null && saintName.isNotEmpty && m.saintName != null) {
+        return m.saintName!.toLowerCase() == saintName.toLowerCase();
+      }
+      return true; // chỉ trùng tên đầy đủ → vẫn cảnh báo
+    }).toList();
+  }
+
   /// Subscribe realtime — return unsubscribe function.
   Future<void Function()> subscribe(void Function(RecordSubscriptionEvent) onEvent) async {
     final pb = RealCmPocketBase.instance();
