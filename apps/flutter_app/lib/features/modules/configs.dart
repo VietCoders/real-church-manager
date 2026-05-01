@@ -63,6 +63,7 @@ final confirmationConfig = CollectionConfig(
   primaryDisplay: (d) => d['book_number']?.toString().isNotEmpty == true ? 'Số sổ ${d['book_number']}' : 'Thêm Sức (chưa có số sổ)',
   secondaryDisplay: (d) => '${_date(d['confirmation_date'])} · ĐGM: ${d['bishop_name'] ?? ''}',
   sort: '-confirmation_date',
+  onPrintCertificate: printConfirmationCertificate,
   fields: const [
     CrudFieldConfig(name: 'book_number', label: 'Số sổ', section: 'Thông tin chung', helper: 'TS-YYYY-NNNN', flex: 1),
     CrudFieldConfig(name: 'confirmation_date', label: 'Ngày Thêm Sức', type: CrudFieldType.date, required: true, section: 'Thông tin chung', flex: 1),
