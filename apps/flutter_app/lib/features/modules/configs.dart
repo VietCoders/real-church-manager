@@ -270,6 +270,7 @@ final familyConfig = CollectionConfig(
   ].join(' · '),
   softDelete: true,
   sort: 'family_name',
+  detailRoutePrefix: '/families',
   fields: const [
     CrudFieldConfig(name: 'family_name', label: 'Tên gia đình', helper: 'Vd: Gia đình ông Phêrô Nguyễn Văn A', section: 'Thông tin chung'),
     CrudFieldConfig(name: 'head_id', label: 'Gia trưởng', type: CrudFieldType.relation, required: true, relationCollection: 'members', relationDisplayField: 'full_name', section: 'Thông tin chung'),
