@@ -69,7 +69,7 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => _CrudFormDialog(config: widget.config, existing: existing),
+      builder: (_) => CrudFormDialogPublic(config: widget.config, existing: existing),
     );
     if (result == true) {
       if (mounted) realCmToast(context, existing == null ? 'Đã thêm ${widget.config.itemSingular}' : 'Đã cập nhật', type: RealCmToastType.success);
@@ -220,16 +220,17 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
   }
 }
 
-class _CrudFormDialog extends ConsumerStatefulWidget {
-  const _CrudFormDialog({required this.config, this.existing});
+class CrudFormDialogPublic extends ConsumerStatefulWidget {
+  const CrudFormDialogPublic({super.key, required this.config, this.existing, this.defaults});
+  final Map<String, dynamic>? defaults;
   final CollectionConfig config;
   final RecordModel? existing;
 
   @override
-  ConsumerState<_CrudFormDialog> createState() => _CrudFormDialogState();
+  ConsumerState<CrudFormDialogPublic> createState() => _CrudFormDialogState();
 }
 
-class _CrudFormDialogState extends ConsumerState<_CrudFormDialog> {
+class _CrudFormDialogState extends ConsumerState<CrudFormDialogPublic> {
   final _formKey = GlobalKey<FormState>();
   final _values = <String, dynamic>{};
   final _ctrls = <String, TextEditingController>{};
@@ -238,7 +239,7 @@ class _CrudFormDialogState extends ConsumerState<_CrudFormDialog> {
   @override
   void initState() {
     super.initState();
-    final initial = widget.existing?.data ?? {};
+    final initial = Map<String, dynamic>.from(widget.existing?.data ?? widget.defaults ?? {});
     for (final f in widget.config.fields) {
       final v = initial[f.name];
       _values[f.name] = v;
