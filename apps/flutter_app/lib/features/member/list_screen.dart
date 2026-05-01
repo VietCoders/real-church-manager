@@ -132,6 +132,11 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
           onPressed: () => setState(() => _showDeleted = !_showDeleted),
         ),
         IconButton(
+          icon: const Icon(Icons.file_upload_outlined),
+          tooltip: 'Import từ Excel/CSV',
+          onPressed: () => context.push('/members-import'),
+        ),
+        IconButton(
           icon: const Icon(Icons.table_view),
           tooltip: 'Xuất toàn bộ ra Excel',
           onPressed: () => exportMembersToExcel(context),
