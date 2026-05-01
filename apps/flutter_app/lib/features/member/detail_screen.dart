@@ -216,6 +216,9 @@ class _DetailBody extends StatelessWidget {
               Expanded(child: _SacramentTimeline(entries: data.sacraments)),
             ]),
             const SizedBox(height: RealCmSpacing.s4),
+            if (data.donations.isNotEmpty)
+              _DonationsCard(donations: data.donations),
+            if (data.donations.isNotEmpty) const SizedBox(height: RealCmSpacing.s4),
             if (m.notes != null && m.notes!.isNotEmpty)
               Container(
                 padding: const EdgeInsets.all(RealCmSpacing.s4),
@@ -382,4 +385,116 @@ class _SacramentTimeline extends StatelessWidget {
       ]),
     );
   }
+}
+
+class _DonationsCard extends StatelessWidget {
+  const _DonationsCard({required this.donations});
+  final List<RecordModel> donations;
+
+  @override
+  Widget build(BuildContext context) {
+    final df = DateFormat('dd/MM/yyyy', 'vi');
+    final fmt = NumberFormat.decimalPattern('vi');
+    num totalIn = 0;
+    num totalOut = 0;
+    for (final d in donations) {
+      final amt = (d.data['amount'] as num?) ?? 0;
+      if (d.data['type']?.toString() == 'expense') {
+        totalOut += amt;
+      } else {
+        totalIn += amt;
+      }
+    }
+    return Container(
+      padding: const EdgeInsets.all(RealCmSpacing.s4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(RealCmRadius.lg),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const Icon(Icons.account_balance_wallet_outlined, size: 18),
+          const SizedBox(width: 8),
+          const Expanded(child: Text('Đóng góp tài chính', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16))),
+          Text('${donations.length} phiếu',
+              style: const TextStyle(fontSize: 12, color: RealCmColors.textMuted)),
+        ]),
+        const SizedBox(height: RealCmSpacing.s2),
+        Row(children: [
+          if (totalIn > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: RealCmColors.success.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(RealCmRadius.full),
+              ),
+              child: Text('Đã dâng: ${fmt.format(totalIn)} đ',
+                  style: const TextStyle(fontSize: 12, color: RealCmColors.success, fontWeight: FontWeight.w600)),
+            ),
+          if (totalOut > 0) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: RealCmColors.danger.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(RealCmRadius.full),
+              ),
+              child: Text('Đã chi: ${fmt.format(totalOut)} đ',
+                  style: const TextStyle(fontSize: 12, color: RealCmColors.danger, fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ]),
+        const SizedBox(height: RealCmSpacing.s3),
+        for (final d in donations.take(10))
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(children: [
+              Icon(
+                d.data['type']?.toString() == 'expense' ? Icons.arrow_circle_down : Icons.arrow_circle_up,
+                size: 16,
+                color: d.data['type']?.toString() == 'expense' ? RealCmColors.danger : RealCmColors.success,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(d.data['description']?.toString().isNotEmpty == true
+                    ? d.data['description'].toString()
+                    : (d.data['type']?.toString() ?? '')),
+              ),
+              Text(_typeLabel(d.data['type']?.toString() ?? ''),
+                  style: const TextStyle(fontSize: 11, color: RealCmColors.textMuted)),
+              const SizedBox(width: 8),
+              Text(
+                d.data['date'] != null ? df.format(DateTime.parse(d.data['date'].toString())) : '',
+                style: const TextStyle(fontSize: 12, color: RealCmColors.textMuted),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '${fmt.format((d.data['amount'] as num?) ?? 0)} đ',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                  color: d.data['type']?.toString() == 'expense' ? RealCmColors.danger : RealCmColors.success,
+                ),
+              ),
+            ]),
+          ),
+        if (donations.length > 10)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text('... và ${donations.length - 10} phiếu khác',
+                style: const TextStyle(fontSize: 12, color: RealCmColors.textMuted)),
+          ),
+      ]),
+    );
+  }
+
+  String _typeLabel(String t) => {
+        'sunday_offering': 'Dâng CN',
+        'feast_offering': 'Lễ trọng',
+        'building_fund': 'Quỹ XD',
+        'mass_intention': 'Xin lễ',
+        'other_in': 'Thu khác',
+        'expense': 'Chi',
+      }[t] ?? t;
 }
