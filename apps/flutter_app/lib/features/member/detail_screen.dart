@@ -238,8 +238,12 @@ class _DetailBody extends StatelessWidget {
                                 m.gender == RealCmGender.male ? RealCmColors.info : RealCmColors.primary),
                           if (m.status != RealCmMemberStatus.active)
                             _statusBadge(m.status),
-                          if (m.birthDate != null)
+                          if (m.birthDate != null) ...[
                             _badge('Sinh ${df.format(m.birthDate!)}', RealCmColors.textMuted),
+                            _badge('${_calcAge(m.birthDate!)} tuổi', RealCmColors.primary),
+                            if (_isBirthdayToday(m.birthDate!))
+                              _badge('🎂 Sinh nhật hôm nay', RealCmColors.accent),
+                          ],
                         ]),
                       ],
                     ),
