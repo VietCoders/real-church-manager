@@ -5,9 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pocketbase/pocketbase.dart';
 
+import 'package:open_filex/open_filex.dart';
+
 import '../../data/stats/repository.dart';
 import '../../design/icons.dart';
 import '../../design/tokens.dart';
+import '../../platform/excel/exporter.dart';
 import '../../platform/pdf/report_builder.dart';
 import '../../platform/pocketbase/client.dart';
 import '../../ui/scaffold/app_shell.dart';
