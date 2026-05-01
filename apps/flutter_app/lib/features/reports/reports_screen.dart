@@ -702,11 +702,12 @@ class _MassIntentionsReport extends ConsumerWidget {
 }
 
 class _ReportFrame extends StatelessWidget {
-  const _ReportFrame({required this.title, required this.child, this.headerActions, this.onExport});
+  const _ReportFrame({required this.title, required this.child, this.headerActions, this.onExport, this.onExportExcel});
   final String title;
   final Widget child;
   final List<Widget>? headerActions;
   final VoidCallback? onExport;
+  final VoidCallback? onExportExcel;
 
   @override
   Widget build(BuildContext context) {
@@ -725,6 +726,12 @@ class _ReportFrame extends StatelessWidget {
             icon: const Icon(RealCmIcons.print, size: 18),
             label: const Text('Xuất PDF'),
             onPressed: onExport,
+          ),
+          const SizedBox(width: RealCmSpacing.s2),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.table_view, size: 18),
+            label: const Text('Xuất Excel'),
+            onPressed: onExportExcel,
           ),
         ]),
       ),
