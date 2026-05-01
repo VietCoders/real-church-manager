@@ -102,7 +102,9 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
     try {
       final pb = RealCmPocketBase.instance();
       final filters = <String>[];
-      if (widget.config.softDelete) filters.add('deleted_at = null');
+      if (widget.config.softDelete) {
+        filters.add(_showDeleted ? 'deleted_at != null' : 'deleted_at = null');
+      }
       if (_search.trim().isNotEmpty) {
         final q = _search.replaceAll('"', '');
         final fieldFilters = widget.config.searchFields.map((f) => '$f ~ "$q"').join(' || ');
