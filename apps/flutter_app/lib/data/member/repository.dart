@@ -98,6 +98,16 @@ class MemberRepository {
     _log.info('Soft-delete giáo dân $id');
   }
 
+  /// Khôi phục từ soft delete (deleted_at = null).
+  Future<Member> restore(String id) async {
+    final pb = RealCmPocketBase.instance();
+    final rec = await pb.collection(_collection).update(id, body: {'deleted_at': null});
+    final m = Member.fromJson(rec.toJson());
+    await _cache.put(m.id, m.toJson());
+    _log.info('Khôi phục giáo dân $id');
+    return m;
+  }
+
   /// Phát hiện trùng lặp giáo dân theo full_name + (birth_date hoặc saint_name).
   /// Dùng khi tạo mới để cảnh báo user trước.
   Future<List<Member>> findDuplicates({
