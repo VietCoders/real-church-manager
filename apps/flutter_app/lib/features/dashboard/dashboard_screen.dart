@@ -69,8 +69,10 @@ final dashboardLayoutProvider =
   return DashboardWidgetRegistry.mergeWithDefaults(layout.widgets);
 });
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
+  @override
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 
   static double _widthFor(DashboardWidgetSize size, double available) {
     switch (size) {
