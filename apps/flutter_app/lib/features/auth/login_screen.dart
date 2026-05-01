@@ -17,11 +17,25 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  static const _kRememberKey = 'login.remember_username';
+  static const _kSavedUsername = 'login.saved_username';
+
   final _formKey = GlobalKey<FormState>();
   final _identityCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   bool _obscure = true;
   bool _loading = false;
+  bool _remember = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final box = RealCmStorageAdapter.settings();
+    _remember = (box.get(_kRememberKey) as bool?) ?? false;
+    if (_remember) {
+      _identityCtrl.text = (box.get(_kSavedUsername) as String?) ?? '';
+    }
+  }
 
   @override
   void dispose() {
@@ -38,6 +52,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             identity: _identityCtrl.text.trim(),
             password: _passwordCtrl.text,
           );
+      // Save remember-me preference
+      final box = RealCmStorageAdapter.settings();
+      await box.put(_kRememberKey, _remember);
+      if (_remember) {
+        await box.put(_kSavedUsername, _identityCtrl.text.trim());
+      } else {
+        await box.delete(_kSavedUsername);
+      }
     } catch (e) {
       if (mounted) {
         realCmToast(context, AppLocalizations.of(context)!.authLoginFailed, type: RealCmToastType.error);
