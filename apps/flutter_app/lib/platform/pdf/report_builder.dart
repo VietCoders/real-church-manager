@@ -197,3 +197,39 @@ class RealCmReportPdfBuilder {
     );
   }
 }
+
+class _PieChart extends pw.StatelessWidget {
+  _PieChart({required this.values, required this.colors});
+  final List<double> values;
+  final List<PdfColor> colors;
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return pw.CustomPaint(
+      size: const PdfPoint(180, 180),
+      painter: (canvas, size) {
+        final cx = size.x / 2;
+        final cy = size.y / 2;
+        final r = math.min(cx, cy) * 0.95;
+        final total = values.fold<double>(0, (s, v) => s + v);
+        if (total <= 0) return;
+        var startAngle = -math.pi / 2;
+        for (var i = 0; i < values.length; i++) {
+          final sweep = (values[i] / total) * 2 * math.pi;
+          canvas.setColor(colors[i]);
+          canvas.moveTo(cx, cy);
+          canvas.lineTo(cx + r * math.cos(startAngle), cy + r * math.sin(startAngle));
+          // Approximate arc với nhiều line segment (PDF không có sẵn arc fill)
+          const steps = 60;
+          for (var s = 1; s <= steps; s++) {
+            final a = startAngle + sweep * (s / steps);
+            canvas.lineTo(cx + r * math.cos(a), cy + r * math.sin(a));
+          }
+          canvas.lineTo(cx, cy);
+          canvas.fillPath();
+          startAngle += sweep;
+        }
+      },
+    );
+  }
+}
