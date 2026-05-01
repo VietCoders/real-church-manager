@@ -1,6 +1,7 @@
 // Preferences — Theme + Language toggle + Backup tools.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../design/icons.dart';
 import '../../design/tokens.dart';
