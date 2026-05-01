@@ -12,6 +12,8 @@ import '../../design/icons.dart';
 import '../../design/tokens.dart';
 import '../../features/auth/connection_logout_actions.dart';
 import '../../platform/pocketbase/auth.dart';
+import '../../platform/sync/queue.dart';
+import '../toast/service.dart';
 import 'nav_destinations.dart';
 
 const double _breakpointDesktop = 1200;
