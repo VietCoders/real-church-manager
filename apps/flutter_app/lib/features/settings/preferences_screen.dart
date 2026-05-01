@@ -236,32 +236,110 @@ class PreferencesScreen extends ConsumerWidget {
       if (!context.mounted) return;
       await showDialog(
         context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Danh sách backup'),
-          content: SizedBox(
-            width: 520,
-            height: 400,
-            child: list.isEmpty
-                ? const Center(child: Text('Chưa có backup nào', style: TextStyle(color: RealCmColors.textMuted)))
-                : ListView.separated(
-                    itemCount: list.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (_, i) {
-                      final b = list[i];
-                      final size = (b.size / 1024 / 1024).toStringAsFixed(2);
-                      return ListTile(
-                        leading: const Icon(Icons.archive_outlined),
-                        title: Text(b.key),
-                        subtitle: Text('$size MB · ${b.modified}'),
-                      );
-                    },
-                  ),
+        builder: (ctx) => StatefulBuilder(
+          builder: (ctx, setState) => AlertDialog(
+            title: const Text('Danh sách backup'),
+            content: SizedBox(
+              width: 640,
+              height: 480,
+              child: list.isEmpty
+                  ? const Center(child: Text('Chưa có backup nào', style: TextStyle(color: RealCmColors.textMuted)))
+                  : ListView.separated(
+                      itemCount: list.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (_, i) {
+                        final b = list[i];
+                        final size = (b.size / 1024 / 1024).toStringAsFixed(2);
+                        return ListTile(
+                          leading: const Icon(Icons.archive_outlined),
+                          title: Text(b.key, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          subtitle: Text('$size MB · ${b.modified}'),
+                          trailing: PopupMenuButton<String>(
+                            icon: const Icon(Icons.more_vert),
+                            onSelected: (v) async {
+                              if (v == 'download') {
+                                await _downloadBackup(context, b.key);
+                              } else if (v == 'restore') {
+                                await _restoreBackup(context, b.key);
+                              } else if (v == 'delete') {
+                                await _deleteBackup(context, b.key);
+                                if (context.mounted) {
+                                  Navigator.of(ctx).pop();
+                                  await _listBackups(context);
+                                }
+                              }
+                            },
+                            itemBuilder: (_) => const [
+                              PopupMenuItem(value: 'download', child: Row(children: [Icon(Icons.download, size: 18), SizedBox(width: 8), Text('Tải về')])),
+                              PopupMenuItem(value: 'restore', child: Row(children: [Icon(Icons.restore, size: 18, color: RealCmColors.warning), SizedBox(width: 8), Text('Khôi phục từ backup này')])),
+                              PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete_outline, size: 18, color: RealCmColors.danger), SizedBox(width: 8), Text('Xoá', style: TextStyle(color: RealCmColors.danger))])),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Đóng'))],
           ),
-          actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Đóng'))],
         ),
       );
     } catch (e) {
       if (context.mounted) realCmToast(context, 'Lỗi: $e (cần quyền PB admin)', type: RealCmToastType.error);
+    }
+  }
+
+  Future<void> _downloadBackup(BuildContext context, String key) async {
+    try {
+      final pb = RealCmPocketBase.instance();
+      // PB cần admin token cho file token
+      final token = await pb.files.getToken();
+      final url = pb.backups.getDownloadURL(token, key);
+      if (await canLaunchUrlString(url)) {
+        await launchUrlString(url);
+        if (context.mounted) realCmToast(context, 'Mở link tải về trên trình duyệt', type: RealCmToastType.info);
+      } else {
+        if (context.mounted) realCmToast(context, 'Không thể mở URL', type: RealCmToastType.error);
+      }
+    } catch (e) {
+      if (context.mounted) realCmToast(context, 'Lỗi tải: $e', type: RealCmToastType.error);
+    }
+  }
+
+  Future<void> _restoreBackup(BuildContext context, String key) async {
+    final ok = await realCmConfirm(
+      context,
+      title: 'Khôi phục từ backup',
+      body: 'CẢNH BÁO: toàn bộ dữ liệu hiện tại sẽ bị thay thế bằng nội dung trong backup "$key". Server sẽ restart và bạn cần đăng nhập lại.\n\nXác nhận khôi phục?',
+      confirmLabel: 'Khôi phục',
+      danger: true,
+    );
+    if (!ok) return;
+    try {
+      final pb = RealCmPocketBase.instance();
+      await pb.backups.restore(key);
+      if (context.mounted) {
+        realCmToast(context, 'Đã yêu cầu khôi phục. Server đang restart, vui lòng đăng nhập lại.', type: RealCmToastType.warning);
+      }
+    } catch (e) {
+      if (context.mounted) realCmToast(context, 'Lỗi khôi phục: $e', type: RealCmToastType.error);
+    }
+  }
+
+  Future<void> _deleteBackup(BuildContext context, String key) async {
+    final ok = await realCmConfirm(
+      context,
+      title: 'Xoá backup',
+      body: 'Xác nhận xoá file backup "$key"?',
+      confirmLabel: 'Xoá',
+      danger: true,
+    );
+    if (!ok) return;
+    try {
+      final pb = RealCmPocketBase.instance();
+      await pb.backups.delete(key);
+      if (context.mounted) realCmToast(context, 'Đã xoá', type: RealCmToastType.success);
+    } catch (e) {
+      if (context.mounted) realCmToast(context, 'Lỗi: $e', type: RealCmToastType.error);
     }
   }
 
