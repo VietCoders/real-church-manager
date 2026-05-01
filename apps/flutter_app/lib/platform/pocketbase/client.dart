@@ -39,4 +39,19 @@ class RealCmPocketBase {
     await RealCmStorageAdapter.settings().put('backend_url', url);
     reset();
   }
+
+  /// Build URL cho file field (avatar/photo). thumb: vd "100x100" hoặc null cho original.
+  static String? fileUrl({
+    required String collection,
+    required String recordId,
+    required String? filename,
+    String? thumb,
+  }) {
+    if (filename == null || filename.isEmpty) return null;
+    final base = backendUrl();
+    if (base == null) return null;
+    final clean = base.endsWith('/') ? base.substring(0, base.length - 1) : base;
+    final q = thumb != null ? '?thumb=$thumb' : '';
+    return '$clean/api/files/$collection/$recordId/$filename$q';
+  }
 }
