@@ -277,7 +277,7 @@ class _MobileDrawer extends StatelessWidget {
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
-              children: realCmDestinations.map((dest) {
+              children: realCmDestinationsFor(role).map((dest) {
                 final active = _isActive(currentRoute, dest.route);
                 return ListTile(
                   leading: Icon(dest.icon, color: active ? RealCmColors.primary : null),
