@@ -85,18 +85,21 @@ class RealCmCertificateBuilder {
       bookNumber: data['book_number']?.toString() ?? '',
       rows: [
         ('Chú rể', groomFullName),
-        ('Cha chú rể', data['groom_father']?.toString() ?? ''),
-        ('Mẹ chú rể', data['groom_mother']?.toString() ?? ''),
+        ('Cha chú rể', data['groom_father_name']?.toString() ?? ''),
+        ('Mẹ chú rể', data['groom_mother_name']?.toString() ?? ''),
         _divider,
         ('Cô dâu', brideFullName),
-        ('Cha cô dâu', data['bride_father']?.toString() ?? ''),
-        ('Mẹ cô dâu', data['bride_mother']?.toString() ?? ''),
+        ('Cha cô dâu', data['bride_father_name']?.toString() ?? ''),
+        ('Mẹ cô dâu', data['bride_mother_name']?.toString() ?? ''),
         _divider,
-        ('Người chứng', data['witness_names']?.toString() ?? ''),
+        ('Người chứng 1', data['witness_1_name']?.toString() ?? ''),
+        ('Người chứng 2', data['witness_2_name']?.toString() ?? ''),
+        if ((data['dispensation']?.toString() ?? '').isNotEmpty)
+          ('Miễn chuẩn', data['dispensation']?.toString() ?? ''),
         _divider,
         ('Đã kết hôn ngày', _date(data['marriage_date'])),
         ('Tại', data['marriage_place']?.toString() ?? ''),
-        ('Cha cử hành', data['priest_name']?.toString() ?? ''),
+        ('Cha chủ sự', data['priest_name']?.toString() ?? ''),
       ],
     );
   }
