@@ -68,16 +68,8 @@ class RealCmAppShell extends ConsumerWidget {
                 ),
               ),
             ]),
-            tooltip: '$pending thay đổi chờ đồng bộ — nhấn để thử ngay',
-            onPressed: () async {
-              final n = await RealCmSyncQueue.instance.drain();
-              ref.read(pendingSyncCountProvider.notifier).state = RealCmSyncQueue.instance.pendingCount();
-              if (context.mounted) {
-                realCmToast(context,
-                    n > 0 ? 'Đã đồng bộ $n thay đổi' : 'Vẫn chưa kết nối server',
-                    type: n > 0 ? RealCmToastType.success : RealCmToastType.warning);
-              }
-            },
+            tooltip: '$pending thay đổi chờ đồng bộ — nhấn để xem chi tiết',
+            onPressed: () => context.push('/sync-queue'),
           ),
         IconButton(
           icon: const Icon(RealCmIcons.logout),
