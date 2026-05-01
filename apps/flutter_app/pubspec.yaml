@@ -43,7 +43,7 @@ dependencies:
   table_calendar: ^3.1.2
 
   # File picker (import Excel/CSV, ảnh giáo dân)
-  file_picker: ^8.1.2
+  file_picker: ^11.0.2
   image_picker: ^1.2.2
 
   # Utility

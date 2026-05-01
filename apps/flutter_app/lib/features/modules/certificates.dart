@@ -7,6 +7,24 @@ import '../../platform/pocketbase/client.dart';
 import '../../ui/pdf/preview_screen.dart';
 import '../../ui/toast/service.dart';
 
+Future<void> _logPrint({
+  required String sacramentType,
+  required String sacramentRecordId,
+  String? memberId,
+}) async {
+  try {
+    final pb = RealCmPocketBase.instance();
+    await pb.collection('cert_print_logs').create(body: {
+      'sacrament_type': sacramentType,
+      'sacrament_record_id': sacramentRecordId,
+      if (memberId != null) 'member_id': memberId,
+      if (pb.authStore.record != null) 'user_id': pb.authStore.record!.id,
+    });
+  } catch (_) {
+    // Fire-and-forget — không ảnh hưởng UX nếu fail
+  }
+}
+
 class _ParishInfo {
   const _ParishInfo({required this.name, required this.address});
   final String name;
@@ -82,6 +100,7 @@ Future<void> printBaptismCertificate(BuildContext ctx, RecordModel rec) async {
     memberBirthDate: _parseDate(member.data['birth_date']),
   );
   if (ctx.mounted) await realCmShowPdfPreview(ctx, title: 'Chứng chỉ Rửa Tội', document: doc);
+  await _logPrint(sacramentType: 'baptism', sacramentRecordId: rec.id, memberId: rec.data['member_id']?.toString());
 }
 
 Future<void> printConfirmationCertificate(BuildContext ctx, RecordModel rec) async {
@@ -99,6 +118,7 @@ Future<void> printConfirmationCertificate(BuildContext ctx, RecordModel rec) asy
     memberFullName: _memberName(member),
   );
   if (ctx.mounted) await realCmShowPdfPreview(ctx, title: 'Chứng chỉ Thêm Sức', document: doc);
+  await _logPrint(sacramentType: 'confirmation', sacramentRecordId: rec.id, memberId: rec.data['member_id']?.toString());
 }
 
 Future<void> printMarriageCertificate(BuildContext ctx, RecordModel rec) async {
@@ -118,6 +138,7 @@ Future<void> printMarriageCertificate(BuildContext ctx, RecordModel rec) async {
     brideFullName: _memberName(bride),
   );
   if (ctx.mounted) await realCmShowPdfPreview(ctx, title: 'Chứng chỉ Hôn Phối', document: doc);
+  await _logPrint(sacramentType: 'marriage', sacramentRecordId: rec.id, memberId: rec.data['groom_id']?.toString());
 }
 
 Future<void> printAnointingCertificate(BuildContext ctx, RecordModel rec) async {
@@ -135,6 +156,7 @@ Future<void> printAnointingCertificate(BuildContext ctx, RecordModel rec) async 
     memberFullName: _memberName(member),
   );
   if (ctx.mounted) await realCmShowPdfPreview(ctx, title: 'Chứng chỉ Xức Dầu', document: doc);
+  await _logPrint(sacramentType: 'anointing', sacramentRecordId: rec.id, memberId: rec.data['member_id']?.toString());
 }
 
 Future<void> printFuneralCertificate(BuildContext ctx, RecordModel rec) async {
@@ -152,4 +174,5 @@ Future<void> printFuneralCertificate(BuildContext ctx, RecordModel rec) async {
     memberFullName: _memberName(member),
   );
   if (ctx.mounted) await realCmShowPdfPreview(ctx, title: 'Chứng chỉ An Táng', document: doc);
+  await _logPrint(sacramentType: 'funeral', sacramentRecordId: rec.id, memberId: rec.data['member_id']?.toString());
 }
