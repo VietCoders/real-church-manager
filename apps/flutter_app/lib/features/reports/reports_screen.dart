@@ -500,6 +500,13 @@ class _SacramentYearReportState extends ConsumerState<_SacramentYearReport> {
           List.generate(labels.length, (i) => MapEntry(labels[i], '${d[i]}')),
           caption: 'Năm $_year', chartType: ReportChartType.bar);
       },
+      onExportExcel: () async {
+        final d = await _load();
+        if (!context.mounted) return;
+        await _exportReportExcel(context, 'Bí Tích theo năm',
+          List.generate(labels.length, (i) => MapEntry(labels[i], '${d[i]}')),
+          caption: 'Năm $_year');
+      },
       child: FutureBuilder<List<int>>(
         future: _future,
         builder: (ctx, snap) {
