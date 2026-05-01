@@ -49,7 +49,7 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
     super.dispose();
   }
 
-  Widget _statusChip({required String label, required String? value}) {
+  Widget _statusFilterChip({required String label, required String? value}) {
     final selected = _statusFilter == value;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
