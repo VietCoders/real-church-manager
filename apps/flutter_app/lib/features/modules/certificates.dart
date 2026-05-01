@@ -1,9 +1,10 @@
-// Certificate printers — fetch member + parish, build PDF, print preview.
+// Certificate printers — fetch member + parish, build PDF, mở preview screen.
 import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 import '../../platform/pdf/builder.dart';
 import '../../platform/pocketbase/client.dart';
+import '../../ui/pdf/preview_screen.dart';
 import '../../ui/toast/service.dart';
 
 class _ParishInfo {
@@ -80,7 +81,7 @@ Future<void> printBaptismCertificate(BuildContext ctx, RecordModel rec) async {
     memberSaintName: (member.data['saint_name'] ?? '').toString(),
     memberBirthDate: _parseDate(member.data['birth_date']),
   );
-  await RealCmCertificateBuilder.printDocument(doc, jobName: 'Chứng chỉ Rửa Tội');
+  if (ctx.mounted) await realCmShowPdfPreview(ctx, title: 'Chứng chỉ Rửa Tội', document: doc);
 }
 
 Future<void> printConfirmationCertificate(BuildContext ctx, RecordModel rec) async {
@@ -97,7 +98,7 @@ Future<void> printConfirmationCertificate(BuildContext ctx, RecordModel rec) asy
     data: rec.data,
     memberFullName: _memberName(member),
   );
-  await RealCmCertificateBuilder.printDocument(doc, jobName: 'Chứng chỉ Thêm Sức');
+  if (ctx.mounted) await realCmShowPdfPreview(ctx, title: 'Chứng chỉ Thêm Sức', document: doc);
 }
 
 Future<void> printMarriageCertificate(BuildContext ctx, RecordModel rec) async {
@@ -116,7 +117,7 @@ Future<void> printMarriageCertificate(BuildContext ctx, RecordModel rec) async {
     groomFullName: _memberName(groom),
     brideFullName: _memberName(bride),
   );
-  await RealCmCertificateBuilder.printDocument(doc, jobName: 'Chứng chỉ Hôn Phối');
+  if (ctx.mounted) await realCmShowPdfPreview(ctx, title: 'Chứng chỉ Hôn Phối', document: doc);
 }
 
 Future<void> printAnointingCertificate(BuildContext ctx, RecordModel rec) async {
@@ -133,7 +134,7 @@ Future<void> printAnointingCertificate(BuildContext ctx, RecordModel rec) async 
     data: rec.data,
     memberFullName: _memberName(member),
   );
-  await RealCmCertificateBuilder.printDocument(doc, jobName: 'Chứng chỉ Xức Dầu');
+  if (ctx.mounted) await realCmShowPdfPreview(ctx, title: 'Chứng chỉ Xức Dầu', document: doc);
 }
 
 Future<void> printFuneralCertificate(BuildContext ctx, RecordModel rec) async {
@@ -150,5 +151,5 @@ Future<void> printFuneralCertificate(BuildContext ctx, RecordModel rec) async {
     data: rec.data,
     memberFullName: _memberName(member),
   );
-  await RealCmCertificateBuilder.printDocument(doc, jobName: 'Chứng chỉ An Táng');
+  if (ctx.mounted) await realCmShowPdfPreview(ctx, title: 'Chứng chỉ An Táng', document: doc);
 }
