@@ -12,6 +12,7 @@ import 'features/calendar/calendar_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/district/list_screen.dart';
 import 'features/family/detail_screen.dart';
+import 'features/member/bulk_import.dart';
 import 'features/member/detail_screen.dart';
 import 'features/member/list_screen.dart';
 import 'features/onboarding/wizard_screen.dart';
