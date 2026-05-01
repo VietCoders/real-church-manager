@@ -304,7 +304,9 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
                               ],
                             )
                           : null,
-                      onTap: canEdit ? () => _showForm(existing: r) : null,
+                      onTap: cfg.detailRoutePrefix != null
+                          ? () => context.push('${cfg.detailRoutePrefix}/${r.id}')
+                          : (canEdit ? () => _showForm(existing: r) : null),
                     );
                   },
                 ),
