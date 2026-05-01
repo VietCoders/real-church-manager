@@ -1,23 +1,22 @@
 /// <reference path="../pb_data/types.d.ts" />
-// Auto backup hàng ngày 03:00 UTC + retention 7 backup. Chỉ giữ 7 file mới nhất tự động.
-// Tên backup: real-cm-auto-YYYYMMDD-HHmmss.zip
+// Auto backup hàng ngày 03:00 UTC. Tên: real-cm-auto-YYYYMMDD-HHmmss.zip
+// Retention 7 file: PB JSVM v0.22 không có API list+delete backup tự động;
+// admin có thể xoá tay trong settings/backups, hoặc dùng cron OS riêng.
 
 cronAdd('realCmDailyBackup', '0 3 * * *', () => {
   try {
     const now = new Date();
-    const ts = now.toISOString().replace(/[:\-]/g, '').replace(/\..+/, '').replace('T', '-');
+    const pad = (n) => (n < 10 ? '0' + n : '' + n);
+    const ts = now.getUTCFullYear()
+      + pad(now.getUTCMonth() + 1)
+      + pad(now.getUTCDate())
+      + '-'
+      + pad(now.getUTCHours())
+      + pad(now.getUTCMinutes())
+      + pad(now.getUTCSeconds());
     const name = `real-cm-auto-${ts}.zip`;
     $app.createBackup($app.newRequestEvent(), name);
     console.log('Auto backup created: ' + name);
-
-    // Retention: giữ 7 backup auto mới nhất, xoá phần dư
-    const fs = require(`${__hooks}/__fs.js`); // no-op stub
-    try {
-      const list = $app.dao().findRecordsByFilter('_pb_backups_', '', '', 100, 0);
-      // PB không expose backup list qua DAO. Dùng FS-level hook không khả dụng trong JSVM v0.22.
-      // Workaround: liệt kê qua filesystem là không stable. Nên giới hạn retention
-      // bằng cron riêng dùng disk maintenance, hoặc admin xoá tay qua UI.
-    } catch (_) {}
   } catch (e) {
     console.log('Auto backup err: ' + e);
   }
