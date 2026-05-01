@@ -242,6 +242,16 @@ class _MemberFormDialogState extends ConsumerState<MemberFormDialog> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _section('Thông tin cá nhân'),
+                      _PhotoSection(
+                        memberId: widget.existing?.id,
+                        photoFilename: _photoFilename,
+                        pendingPhoto: _pendingPhoto,
+                        uploading: _uploadingPhoto,
+                        onPickGallery: () => _pickPhoto(ImageSource.gallery),
+                        onPickCamera: () => _pickPhoto(ImageSource.camera),
+                        onRemove: _removePhoto,
+                      ),
+                      const SizedBox(height: RealCmSpacing.s4),
                       Row(
                         children: [
                           Expanded(
@@ -390,4 +400,90 @@ class _MemberFormDialogState extends ConsumerState<MemberFormDialog> {
           ],
         ),
       );
+}
+
+class _PhotoSection extends StatelessWidget {
+  const _PhotoSection({
+    required this.memberId,
+    required this.photoFilename,
+    required this.pendingPhoto,
+    required this.uploading,
+    required this.onPickGallery,
+    required this.onPickCamera,
+    required this.onRemove,
+  });
+
+  final String? memberId;
+  final String? photoFilename;
+  final File? pendingPhoto;
+  final bool uploading;
+  final VoidCallback onPickGallery;
+  final VoidCallback onPickCamera;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasPhoto = pendingPhoto != null || (photoFilename != null && photoFilename!.isNotEmpty);
+    final url = (pendingPhoto == null && memberId != null && photoFilename != null && photoFilename!.isNotEmpty)
+        ? RealCmPocketBase.fileUrl(collection: 'members', recordId: memberId!, filename: photoFilename, thumb: '300x300')
+        : null;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          width: 96,
+          height: 96,
+          decoration: BoxDecoration(
+            color: RealCmColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(RealCmRadius.lg),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: uploading
+              ? const Center(child: CircularProgressIndicator())
+              : pendingPhoto != null
+                  ? Image.file(pendingPhoto!, fit: BoxFit.cover)
+                  : url != null
+                      ? Image.network(url, fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(RealCmIcons.member, size: 40, color: RealCmColors.textMuted))
+                      : const Icon(RealCmIcons.member, size: 40, color: RealCmColors.textMuted),
+        ),
+        const SizedBox(width: RealCmSpacing.s4),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Ảnh đại diện', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+              const Text('JPG/PNG/WEBP, tối đa 5MB. Sẽ tự resize thumbnail.',
+                  style: TextStyle(fontSize: 12, color: RealCmColors.textMuted)),
+              const SizedBox(height: RealCmSpacing.s2),
+              Wrap(
+                spacing: RealCmSpacing.s2,
+                runSpacing: RealCmSpacing.s2,
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.photo_library_outlined, size: 16),
+                    label: const Text('Chọn ảnh'),
+                    onPressed: uploading ? null : onPickGallery,
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.photo_camera_outlined, size: 16),
+                    label: const Text('Chụp ảnh'),
+                    onPressed: uploading ? null : onPickCamera,
+                  ),
+                  if (hasPhoto)
+                    TextButton.icon(
+                      icon: const Icon(Icons.delete_outline, size: 16, color: RealCmColors.danger),
+                      label: const Text('Xoá ảnh', style: TextStyle(color: RealCmColors.danger)),
+                      onPressed: uploading ? null : onRemove,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }
