@@ -1,0 +1,516 @@
+// Generic CRUD screen cho bất kỳ collection PocketBase nào.
+// Render list + form modal từ CollectionConfig + CrudFieldConfig[].
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:pocketbase/pocketbase.dart';
+
+import '../../design/icons.dart';
+import '../../design/tokens.dart';
+import '../../platform/pocketbase/auth.dart';
+import '../../platform/pocketbase/client.dart';
+import '../scaffold/app_shell.dart';
+import '../modal/service.dart';
+import '../toast/service.dart';
+import 'crud_scaffold.dart';
+import 'field_config.dart';
+
+class CollectionCrudScreen extends ConsumerStatefulWidget {
+  const CollectionCrudScreen({super.key, required this.config});
+  final CollectionConfig config;
+
+  @override
+  ConsumerState<CollectionCrudScreen> createState() => _CollectionCrudScreenState();
+}
+
+class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
+  String _search = '';
+  late final TextEditingController _searchCtrl;
+  Future<List<RecordModel>>? _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchCtrl = TextEditingController();
+    _refresh();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _refresh() {
+    setState(() {
+      _future = _load();
+    });
+  }
+
+  Future<List<RecordModel>> _load() async {
+    final pb = RealCmPocketBase.instance();
+    final filters = <String>[];
+    if (widget.config.softDelete) filters.add('deleted_at = null');
+    if (_search.trim().isNotEmpty) {
+      final q = _search.replaceAll('"', '');
+      final fieldFilters = widget.config.searchFields.map((f) => '$f ~ "$q"').join(' || ');
+      if (fieldFilters.isNotEmpty) filters.add('($fieldFilters)');
+    }
+    final res = await pb.collection(widget.config.collection).getList(
+      page: 1, perPage: 200,
+      filter: filters.isEmpty ? null : filters.join(' && '),
+      sort: widget.config.sort,
+      expand: widget.config.expand,
+    );
+    return res.items;
+  }
+
+  Future<void> _showForm({RecordModel? existing}) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _CrudFormDialog(config: widget.config, existing: existing),
+    );
+    if (result == true) {
+      if (mounted) realCmToast(context, existing == null ? 'Đã thêm ${widget.config.itemSingular}' : 'Đã cập nhật', type: RealCmToastType.success);
+      _refresh();
+    }
+  }
+
+  Future<void> _delete(RecordModel rec) async {
+    final ok = await realCmConfirm(
+      context,
+      title: 'Xoá ${widget.config.itemSingular}',
+      body: 'Bạn có chắc muốn xoá "${widget.config.primaryDisplay(rec.data)}"?',
+      confirmLabel: 'Xoá',
+      danger: true,
+    );
+    if (!ok) return;
+    try {
+      final pb = RealCmPocketBase.instance();
+      if (widget.config.softDelete) {
+        await pb.collection(widget.config.collection).update(rec.id, body: {
+          'deleted_at': DateTime.now().toIso8601String(),
+        });
+      } else {
+        await pb.collection(widget.config.collection).delete(rec.id);
+      }
+      if (mounted) {
+        realCmToast(context, 'Đã xoá', type: RealCmToastType.success);
+        _refresh();
+      }
+    } catch (e) {
+      if (mounted) realCmToast(context, 'Xoá thất bại: $e', type: RealCmToastType.error);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = ref.watch(realCmAuthProvider);
+    final canEdit = auth.canEditMembers;
+    final cfg = widget.config;
+    final color = cfg.color ?? RealCmColors.primary;
+    final iconColor = cfg.iconColor ?? color;
+
+    return RealCmAppShell(
+      title: cfg.title,
+      actions: [
+        IconButton(icon: const Icon(RealCmIcons.refresh), tooltip: 'Làm mới', onPressed: _refresh),
+      ],
+      floatingActionButton: canEdit
+          ? FloatingActionButton.extended(
+              onPressed: () => _showForm(),
+              icon: const Icon(RealCmIcons.add),
+              label: Text('Thêm ${cfg.itemSingular}'),
+              backgroundColor: color,
+              foregroundColor: Colors.white,
+            )
+          : null,
+      body: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(RealCmSpacing.s4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
+            ),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(RealCmIcons.search),
+                hintText: cfg.searchHint,
+                suffixIcon: _search.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(RealCmIcons.close),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          setState(() => _search = '');
+                          _refresh();
+                        },
+                      )
+                    : null,
+              ),
+              onSubmitted: (v) {
+                setState(() => _search = v);
+                _refresh();
+              },
+              onChanged: (v) {
+                _search = v;
+              },
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<List<RecordModel>>(
+              future: _future,
+              builder: (ctx, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snap.hasError) return CrudErrorState(error: snap.error!, onRetry: _refresh);
+                final items = snap.data ?? [];
+                if (items.isEmpty) {
+                  return CrudEmptyState(
+                    icon: cfg.icon,
+                    title: 'Chưa có ${cfg.itemSingular} nào',
+                    hint: 'Thêm mới để bắt đầu.',
+                    canAdd: canEdit && _search.isEmpty,
+                    addLabel: 'Thêm ${cfg.itemSingular}',
+                    onAdd: () => _showForm(),
+                    isSearching: _search.isNotEmpty,
+                  );
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: RealCmSpacing.s2),
+                  itemCount: items.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1, indent: 72),
+                  itemBuilder: (_, i) {
+                    final r = items[i];
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: RealCmSpacing.s4, vertical: RealCmSpacing.s2),
+                      leading: CircleAvatar(
+                        backgroundColor: iconColor.withValues(alpha: 0.15),
+                        child: Icon(cfg.icon, color: iconColor, size: 20),
+                      ),
+                      title: Text(cfg.primaryDisplay(r.data), style: const TextStyle(fontWeight: FontWeight.w600)),
+                      subtitle: Text(cfg.secondaryDisplay(r.data),
+                          style: const TextStyle(color: RealCmColors.textMuted, fontSize: 13)),
+                      trailing: canEdit
+                          ? PopupMenuButton<String>(
+                              icon: const Icon(RealCmIcons.more),
+                              onSelected: (v) {
+                                if (v == 'edit') _showForm(existing: r);
+                                if (v == 'delete') _delete(r);
+                              },
+                              itemBuilder: (_) => const [
+                                PopupMenuItem(value: 'edit', child: Text('Sửa')),
+                                PopupMenuItem(value: 'delete', child: Text('Xoá', style: TextStyle(color: RealCmColors.danger))),
+                              ],
+                            )
+                          : null,
+                      onTap: canEdit ? () => _showForm(existing: r) : null,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CrudFormDialog extends ConsumerStatefulWidget {
+  const _CrudFormDialog({required this.config, this.existing});
+  final CollectionConfig config;
+  final RecordModel? existing;
+
+  @override
+  ConsumerState<_CrudFormDialog> createState() => _CrudFormDialogState();
+}
+
+class _CrudFormDialogState extends ConsumerState<_CrudFormDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _values = <String, dynamic>{};
+  final _ctrls = <String, TextEditingController>{};
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.existing?.data ?? {};
+    for (final f in widget.config.fields) {
+      final v = initial[f.name];
+      _values[f.name] = v;
+      if ([CrudFieldType.text, CrudFieldType.textarea, CrudFieldType.number].contains(f.type)) {
+        _ctrls[f.name] = TextEditingController(text: v?.toString() ?? '');
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final c in _ctrls.values) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
+    try {
+      final body = <String, dynamic>{};
+      for (final f in widget.config.fields) {
+        if (_ctrls.containsKey(f.name)) {
+          final s = _ctrls[f.name]!.text.trim();
+          if (s.isNotEmpty) {
+            if (f.type == CrudFieldType.number) {
+              body[f.name] = num.tryParse(s) ?? 0;
+            } else {
+              body[f.name] = s;
+            }
+          }
+        } else {
+          final v = _values[f.name];
+          if (v != null) {
+            if (v is DateTime) {
+              body[f.name] = v.toIso8601String();
+            } else {
+              body[f.name] = v;
+            }
+          }
+        }
+      }
+      final pb = RealCmPocketBase.instance();
+      if (widget.existing == null) {
+        await pb.collection(widget.config.collection).create(body: body);
+      } else {
+        await pb.collection(widget.config.collection).update(widget.existing!.id, body: body);
+      }
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) realCmToast(context, 'Lỗi: $e', type: RealCmToastType.error);
+      setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cfg = widget.config;
+    final df = DateFormat('dd/MM/yyyy', 'vi');
+    String? lastSection;
+    final children = <Widget>[];
+
+    for (var i = 0; i < cfg.fields.length; i++) {
+      final f = cfg.fields[i];
+      if (f.section != lastSection && f.section != null) {
+        children.add(CrudFormSection(label: f.section!));
+        lastSection = f.section;
+      }
+      // Group fields cùng section + có flex thành Row.
+      Widget fieldWidget = _buildField(f, df);
+      // Look-ahead: nếu field tiếp theo cùng section + flex>0 → Row
+      if (f.flex > 0 && i + 1 < cfg.fields.length) {
+        final next = cfg.fields[i + 1];
+        if (next.section == f.section && next.flex > 0) {
+          children.add(Row(children: [
+            Expanded(flex: f.flex, child: fieldWidget),
+            const SizedBox(width: RealCmSpacing.s3),
+            Expanded(flex: next.flex, child: _buildField(next, df)),
+          ]));
+          children.add(const SizedBox(height: RealCmSpacing.s3));
+          i++; // skip next
+          continue;
+        }
+      }
+      children.add(fieldWidget);
+      children.add(const SizedBox(height: RealCmSpacing.s3));
+    }
+
+    return CrudFormScaffold(
+      title: widget.existing == null ? 'Thêm ${cfg.itemSingular}' : 'Sửa ${cfg.itemSingular}',
+      icon: cfg.icon,
+      isEdit: widget.existing != null,
+      saving: _saving,
+      onCancel: () => Navigator.of(context).pop(false),
+      onSave: _save,
+      body: Form(
+        key: _formKey,
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
+      ),
+    );
+  }
+
+  Widget _buildField(CrudFieldConfig f, DateFormat df) {
+    switch (f.type) {
+      case CrudFieldType.textarea:
+        return TextFormField(
+          controller: _ctrls[f.name],
+          decoration: InputDecoration(labelText: f.required ? '${f.label} *' : f.label, hintText: f.hint, helperText: f.helper, alignLabelWithHint: true),
+          maxLines: f.maxLines ?? 3,
+          validator: f.required ? (v) => (v == null || v.trim().isEmpty) ? 'Bắt buộc' : null : null,
+        );
+      case CrudFieldType.number:
+        return TextFormField(
+          controller: _ctrls[f.name],
+          decoration: InputDecoration(labelText: f.required ? '${f.label} *' : f.label, hintText: f.hint, helperText: f.helper),
+          keyboardType: TextInputType.number,
+          validator: f.required ? (v) => (v == null || v.trim().isEmpty) ? 'Bắt buộc' : null : null,
+        );
+      case CrudFieldType.date:
+      case CrudFieldType.datetime:
+        return InkWell(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: _values[f.name] is DateTime ? _values[f.name] as DateTime : DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime(2100),
+              locale: const Locale('vi'),
+            );
+            if (picked != null) setState(() => _values[f.name] = picked);
+          },
+          child: InputDecorator(
+            decoration: InputDecoration(
+              labelText: f.required ? '${f.label} *' : f.label,
+              suffixIcon: const Icon(RealCmIcons.calendar),
+              helperText: f.helper,
+            ),
+            child: Text(
+              _values[f.name] is DateTime ? df.format(_values[f.name] as DateTime) : 'Chọn...',
+              style: TextStyle(color: _values[f.name] == null ? RealCmColors.textMuted : null),
+            ),
+          ),
+        );
+      case CrudFieldType.select:
+        return DropdownButtonFormField<String>(
+          value: _values[f.name] as String?,
+          decoration: InputDecoration(labelText: f.required ? '${f.label} *' : f.label, helperText: f.helper),
+          items: f.options.map((o) => DropdownMenuItem(value: o.value, child: Text(o.label))).toList(),
+          onChanged: (v) => setState(() => _values[f.name] = v),
+          validator: f.required ? (v) => (v == null || v.isEmpty) ? 'Bắt buộc' : null : null,
+        );
+      case CrudFieldType.bool:
+        return CheckboxListTile(
+          value: (_values[f.name] as bool?) ?? false,
+          onChanged: (v) => setState(() => _values[f.name] = v ?? false),
+          title: Text(f.label),
+          subtitle: f.helper != null ? Text(f.helper!) : null,
+          contentPadding: EdgeInsets.zero,
+        );
+      case CrudFieldType.relation:
+        return _RelationField(
+          field: f,
+          value: _values[f.name] as String?,
+          onChanged: (v) => setState(() => _values[f.name] = v),
+        );
+      case CrudFieldType.text:
+        return TextFormField(
+          controller: _ctrls[f.name],
+          decoration: InputDecoration(labelText: f.required ? '${f.label} *' : f.label, hintText: f.hint, helperText: f.helper),
+          validator: f.required ? (v) => (v == null || v.trim().isEmpty) ? 'Bắt buộc' : null : null,
+        );
+    }
+  }
+}
+
+class _RelationField extends ConsumerStatefulWidget {
+  const _RelationField({required this.field, required this.value, required this.onChanged});
+  final CrudFieldConfig field;
+  final String? value;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  ConsumerState<_RelationField> createState() => _RelationFieldState();
+}
+
+class _RelationFieldState extends ConsumerState<_RelationField> {
+  String? _displayLabel;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.value != null) _loadLabel();
+  }
+
+  Future<void> _loadLabel() async {
+    try {
+      final pb = RealCmPocketBase.instance();
+      final r = await pb.collection(widget.field.relationCollection!).getOne(widget.value!);
+      final df = widget.field.relationDisplayField ?? 'name';
+      setState(() => _displayLabel = r.data[df]?.toString() ?? r.id);
+    } catch (_) {
+      setState(() => _displayLabel = widget.value);
+    }
+  }
+
+  Future<void> _pick() async {
+    final pb = RealCmPocketBase.instance();
+    final res = await pb.collection(widget.field.relationCollection!).getList(page: 1, perPage: 100, sort: widget.field.relationDisplayField ?? 'created');
+    if (!mounted) return;
+    final picked = await showDialog<RecordModel>(
+      context: context,
+      builder: (ctx) => Dialog(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480, maxHeight: 540),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(RealCmSpacing.s3),
+                child: Text('Chọn ${widget.field.label.toLowerCase()}',
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: res.items.length,
+                  itemBuilder: (_, i) {
+                    final r = res.items[i];
+                    final df = widget.field.relationDisplayField ?? 'name';
+                    final label = r.data[df]?.toString() ?? r.id;
+                    return ListTile(
+                      leading: const Icon(RealCmIcons.member),
+                      title: Text(label),
+                      onTap: () => Navigator.of(ctx).pop(r),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (picked != null) {
+      widget.onChanged(picked.id);
+      final df = widget.field.relationDisplayField ?? 'name';
+      setState(() => _displayLabel = picked.data[df]?.toString());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: _pick,
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: widget.field.required ? '${widget.field.label} *' : widget.field.label,
+          suffixIcon: widget.value != null
+              ? IconButton(
+                  icon: const Icon(RealCmIcons.close, size: 18),
+                  onPressed: () {
+                    widget.onChanged(null);
+                    setState(() => _displayLabel = null);
+                  },
+                )
+              : const Icon(RealCmIcons.search),
+        ),
+        child: Text(
+          _displayLabel ?? (widget.value ?? 'Chọn...'),
+          style: TextStyle(color: widget.value == null ? RealCmColors.textMuted : null),
+        ),
+      ),
+    );
+  }
+}
