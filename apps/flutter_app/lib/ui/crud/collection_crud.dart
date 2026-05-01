@@ -522,11 +522,7 @@ class _CrudFormDialogState extends ConsumerState<CrudFormDialogPublic> {
             if (picked != null) setState(() => _values[f.name] = picked);
           },
           child: InputDecorator(
-            decoration: InputDecoration(
-              labelText: f.required ? '${f.label} *' : f.label,
-              suffixIcon: const Icon(RealCmIcons.calendar),
-              helperText: f.helper,
-            ),
+            decoration: _decoration(f, suffixIcon: const Icon(RealCmIcons.calendar)),
             child: Text(
               _values[f.name] is DateTime ? df.format(_values[f.name] as DateTime) : 'Chọn...',
               style: TextStyle(color: _values[f.name] == null ? RealCmColors.textMuted : null),
@@ -536,9 +532,14 @@ class _CrudFormDialogState extends ConsumerState<CrudFormDialogPublic> {
       case CrudFieldType.select:
         return DropdownButtonFormField<String>(
           value: _values[f.name] as String?,
-          decoration: InputDecoration(labelText: f.required ? '${f.label} *' : f.label, helperText: f.helper),
+          decoration: _decoration(f),
           items: f.options.map((o) => DropdownMenuItem(value: o.value, child: Text(o.label))).toList(),
-          onChanged: (v) => setState(() => _values[f.name] = v),
+          onChanged: (v) {
+            setState(() {
+              _values[f.name] = v;
+              _fieldErrors.remove(f.name);
+            });
+          },
           validator: f.required ? (v) => (v == null || v.isEmpty) ? 'Bắt buộc' : null : null,
         );
       case CrudFieldType.bool:
