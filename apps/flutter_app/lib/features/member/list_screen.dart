@@ -151,12 +151,7 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
                     final m = members[i];
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: RealCmSpacing.s4, vertical: RealCmSpacing.s2),
-                      leading: CircleAvatar(
-                        radius: 22,
-                        backgroundColor: _genderColor(m.gender).withValues(alpha: 0.15),
-                        child: Text(_initials(m.displayName),
-                            style: TextStyle(color: _genderColor(m.gender), fontWeight: FontWeight.w600)),
-                      ),
+                      leading: _Avatar(member: m),
                       title: Text(m.displayName, style: const TextStyle(fontWeight: FontWeight.w600)),
                       subtitle: Padding(
                         padding: const EdgeInsets.only(top: 2),
@@ -323,6 +318,50 @@ class _ErrorState extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _Avatar extends StatelessWidget {
+  const _Avatar({required this.member});
+  final Member member;
+
+  Color _genderColor() {
+    switch (member.gender) {
+      case RealCmGender.male: return RealCmColors.info;
+      case RealCmGender.female: return RealCmColors.primary;
+      default: return RealCmColors.textMuted;
+    }
+  }
+
+  String _initials() {
+    final parts = member.displayName.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
+    return (parts.first.substring(0, 1) + parts.last.substring(0, 1)).toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _genderColor();
+    final url = RealCmPocketBase.fileUrl(
+      collection: 'members',
+      recordId: member.id,
+      filename: member.photo,
+      thumb: '100x100',
+    );
+    if (url == null) {
+      return CircleAvatar(
+        radius: 22,
+        backgroundColor: color.withValues(alpha: 0.15),
+        child: Text(_initials(), style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+      );
+    }
+    return CircleAvatar(
+      radius: 22,
+      backgroundColor: color.withValues(alpha: 0.15),
+      backgroundImage: NetworkImage(url),
+      onBackgroundImageError: (_, __) {},
     );
   }
 }
