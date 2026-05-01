@@ -132,6 +132,23 @@ class PreferencesScreen extends ConsumerWidget {
                       label: const Text('Xem danh sách backup'),
                       onPressed: () => _listBackups(context),
                     ),
+                    const SizedBox(height: RealCmSpacing.s3),
+                    Container(
+                      padding: const EdgeInsets.all(RealCmSpacing.s3),
+                      decoration: BoxDecoration(
+                        color: RealCmColors.success.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(RealCmRadius.md),
+                      ),
+                      child: const Row(children: [
+                        Icon(Icons.schedule, color: RealCmColors.success, size: 18),
+                        SizedBox(width: RealCmSpacing.s2),
+                        Expanded(child: Text(
+                          'Tự động sao lưu hàng ngày lúc 03:00 UTC (10:00 sáng VN). '
+                          'Tên file: real-cm-auto-YYYYMMDD-HHMMSS.zip.',
+                          style: TextStyle(fontSize: 13),
+                        )),
+                      ]),
+                    ),
                     const SizedBox(height: RealCmSpacing.s2),
                     Container(
                       padding: const EdgeInsets.all(RealCmSpacing.s3),
@@ -144,7 +161,7 @@ class PreferencesScreen extends ConsumerWidget {
                         SizedBox(width: RealCmSpacing.s2),
                         Expanded(child: Text(
                           'Backup được lưu trên server PocketBase tại pb_data/backups/. '
-                          'Sao lưu định kỳ ra ổ cứng riêng để an toàn.',
+                          'Nên sao chép định kỳ ra ổ cứng riêng để an toàn.',
                           style: TextStyle(fontSize: 13),
                         )),
                       ]),
