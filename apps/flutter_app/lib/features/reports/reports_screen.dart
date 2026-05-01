@@ -324,10 +324,22 @@ class _ByGenderReport extends ConsumerWidget {
   const _ByGenderReport();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final repo = ref.read(_statsRepoProvider);
     return _ReportFrame(
       title: 'Phân bổ giáo dân theo giới tính',
+      onExport: () async {
+        final m = await repo.membersByGender();
+        if (!context.mounted) return;
+        final total = (m['male']??0) + (m['female']??0) + (m['other']??0);
+        await _exportReportPdf(context, 'Giáo dân theo giới tính', [
+          MapEntry('Nam', '${m['male']??0}'),
+          MapEntry('Nữ', '${m['female']??0}'),
+          MapEntry('Khác', '${m['other']??0}'),
+          MapEntry('Tổng', '$total'),
+        ]);
+      },
       child: FutureBuilder(
-        future: ref.read(_statsRepoProvider).membersByGender(),
+        future: repo.membersByGender(),
         builder: (ctx, snap) {
           if (!snap.hasData) return const Center(child: CircularProgressIndicator());
           final m = snap.data as Map<String, int>;
