@@ -96,8 +96,21 @@ class DashboardScreen extends ConsumerStatefulWidget {
     }
   }
 
+  static double _heightForStatic(DashboardWidgetSize s) => _heightFor(s);
+  static double _widthForStatic(DashboardWidgetSize s, double a) => _widthFor(s, a);
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _maybeShowOnboarding(context, ref);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final layoutAsync = ref.watch(dashboardLayoutProvider);
     return RealCmAppShell(
       title: 'Bảng điều khiển',
