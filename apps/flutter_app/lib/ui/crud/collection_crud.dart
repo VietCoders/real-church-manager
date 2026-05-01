@@ -208,19 +208,13 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
                         icon: const Icon(RealCmIcons.close),
                         onPressed: () {
                           _searchCtrl.clear();
-                          setState(() => _search = '');
+                          _search = '';
                           _refresh();
                         },
                       )
                     : null,
               ),
-              onSubmitted: (v) {
-                setState(() => _search = v);
-                _refresh();
-              },
-              onChanged: (v) {
-                _search = v;
-              },
+              onChanged: _onSearchChanged,
             ),
           ),
           Expanded(
