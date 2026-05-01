@@ -98,4 +98,26 @@ class MemberRepository {
     final pb = RealCmPocketBase.instance();
     return pb.collection(_collection).subscribe('*', onEvent);
   }
+
+  /// Upload photo cho member. Trả về Member updated.
+  Future<Member> uploadPhoto(String memberId, File file) async {
+    final pb = RealCmPocketBase.instance();
+    final rec = await pb.collection(_collection).update(
+      memberId,
+      files: [http.MultipartFile.fromBytes('photo', await file.readAsBytes(), filename: file.path.split(Platform.pathSeparator).last)],
+    );
+    final m = Member.fromJson(rec.toJson());
+    await _cache.put(m.id, m.toJson());
+    _log.info('Upload photo cho member $memberId');
+    return m;
+  }
+
+  /// Xoá photo (set photo='').
+  Future<Member> removePhoto(String memberId) async {
+    final pb = RealCmPocketBase.instance();
+    final rec = await pb.collection(_collection).update(memberId, body: {'photo': null});
+    final m = Member.fromJson(rec.toJson());
+    await _cache.put(m.id, m.toJson());
+    return m;
+  }
 }
