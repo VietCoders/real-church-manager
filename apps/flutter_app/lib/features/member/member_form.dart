@@ -377,21 +377,26 @@ class _MemberFormDialogState extends ConsumerState<MemberFormDialog> {
                       const SizedBox(height: RealCmSpacing.s3),
                       TextFormField(controller: _birthPlaceCtrl, decoration: const InputDecoration(labelText: 'Nơi sinh')),
                       const SizedBox(height: RealCmSpacing.s3),
-                      TextFormField(controller: _idNumberCtrl, decoration: const InputDecoration(labelText: 'Số CCCD/CMND')),
+                      TextFormField(
+                        controller: _idNumberCtrl,
+                        decoration: const InputDecoration(labelText: 'Số CCCD/CMND', helperText: '9 số (CMND) hoặc 12 số (CCCD)'),
+                        validator: RealCmValidators.idNumber,
+                      ),
 
                       const SizedBox(height: RealCmSpacing.s4),
                       _section('Liên hệ'),
-                      TextFormField(controller: _phoneCtrl, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Điện thoại')),
+                      TextFormField(
+                        controller: _phoneCtrl,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(labelText: 'Điện thoại', helperText: 'Vd: 0901234567 hoặc +84901234567'),
+                        validator: RealCmValidators.phone,
+                      ),
                       const SizedBox(height: RealCmSpacing.s3),
                       TextFormField(
                         controller: _emailCtrl,
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(labelText: 'Email'),
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return null;
-                          if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v)) return 'Email không hợp lệ';
-                          return null;
-                        },
+                        validator: RealCmValidators.email,
                       ),
                       const SizedBox(height: RealCmSpacing.s3),
                       TextFormField(controller: _addressCtrl, maxLines: 2, decoration: const InputDecoration(labelText: 'Địa chỉ')),
