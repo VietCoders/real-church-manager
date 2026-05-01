@@ -48,6 +48,7 @@ final realCmRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/', builder: (_, __) => const DashboardScreen()),
 
       GoRoute(path: '/members', builder: (_, __) => const MemberListScreen()),
+      GoRoute(path: '/members/:id', builder: (_, state) => MemberDetailScreen(memberId: state.pathParameters['id']!)),
       GoRoute(path: '/districts', builder: (_, __) => const DistrictListScreen()),
       GoRoute(path: '/settings', builder: (_, __) => const ParishSettingsScreen()),
       GoRoute(path: '/preferences', builder: (_, __) => const PreferencesScreen()),
