@@ -14,6 +14,7 @@ import 'features/district/list_screen.dart';
 import 'features/family/detail_screen.dart';
 import 'features/member/detail_screen.dart';
 import 'features/member/list_screen.dart';
+import 'features/onboarding/wizard_screen.dart';
 import 'features/modules/configs.dart' as cfg;
 import 'features/reports/reports_screen.dart';
 import 'features/settings/connection_screen.dart';
