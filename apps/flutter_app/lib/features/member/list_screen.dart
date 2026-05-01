@@ -17,18 +17,20 @@ import 'bulk_export.dart';
 import 'member_form.dart';
 
 class _MemberListQuery {
-  const _MemberListQuery({this.search, this.status});
+  const _MemberListQuery({this.search, this.status, this.showDeleted = false});
   final String? search;
   final String? status;
+  final bool showDeleted;
 
   @override
-  bool operator ==(Object other) => other is _MemberListQuery && other.search == search && other.status == status;
+  bool operator ==(Object other) => other is _MemberListQuery
+      && other.search == search && other.status == status && other.showDeleted == showDeleted;
   @override
-  int get hashCode => Object.hash(search, status);
+  int get hashCode => Object.hash(search, status, showDeleted);
 }
 
 final _memberListProvider = FutureProvider.autoDispose.family<List<Member>, _MemberListQuery>(
-  (ref, q) => ref.read(memberRepoProvider).list(search: q.search, status: q.status),
+  (ref, q) => ref.read(memberRepoProvider).list(search: q.search, status: q.status, showDeleted: q.showDeleted),
 );
 
 class MemberListScreen extends ConsumerStatefulWidget {
