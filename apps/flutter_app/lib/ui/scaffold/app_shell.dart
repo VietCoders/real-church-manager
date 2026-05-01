@@ -43,11 +43,39 @@ class RealCmAppShell extends ConsumerWidget {
     final isTablet = width >= _breakpointTablet && width < _breakpointDesktop;
     final currentRoute = GoRouterState.of(context).matchedLocation;
 
+    final pending = ref.watch(pendingSyncCountProvider);
     final appBar = AppBar(
       automaticallyImplyLeading: !isDesktop && !isTablet,
       title: Text(title),
       actions: [
         if (actions != null) ...actions!,
+        if (pending > 0)
+          IconButton(
+            icon: Stack(clipBehavior: Clip.none, children: [
+              const Icon(Icons.sync_problem),
+              Positioned(
+                right: -6, top: -4,
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(color: RealCmColors.warning, shape: BoxShape.circle),
+                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  child: Text('$pending',
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700),
+                      textAlign: TextAlign.center),
+                ),
+              ),
+            ]),
+            tooltip: '$pending thay đổi chờ đồng bộ — nhấn để thử ngay',
+            onPressed: () async {
+              final n = await RealCmSyncQueue.instance.drain();
+              ref.read(pendingSyncCountProvider.notifier).state = RealCmSyncQueue.instance.pendingCount();
+              if (context.mounted) {
+                realCmToast(context,
+                    n > 0 ? 'Đã đồng bộ $n thay đổi' : 'Vẫn chưa kết nối server',
+                    type: n > 0 ? RealCmToastType.success : RealCmToastType.warning);
+              }
+            },
+          ),
         IconButton(
           icon: const Icon(RealCmIcons.logout),
           tooltip: 'Đăng xuất',
