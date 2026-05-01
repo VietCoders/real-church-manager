@@ -155,6 +155,82 @@ class _MemberFormDialogState extends ConsumerState<MemberFormDialog> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
+
+    // Duplicate detection — chỉ check khi tạo mới
+    if (widget.existing == null) {
+      try {
+        final dups = await ref.read(memberRepoProvider).findDuplicates(
+              fullName: _nameCtrl.text.trim(),
+              birthDate: _birthDate,
+              saintName: _saintCtrl.text.trim(),
+            );
+        if (dups.isNotEmpty && mounted) {
+          final proceed = await showDialog<bool>(
+            context: context,
+            barrierDismissible: false,
+            builder: (ctx) => AlertDialog(
+              icon: const Icon(RealCmIcons.warning, color: RealCmColors.warning, size: 40),
+              title: const Text('Có thể trùng giáo dân'),
+              content: SizedBox(
+                width: 480,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Phát hiện ${dups.length} giáo dân tên gần giống — kiểm tra xem có phải đã có sẵn?',
+                        style: const TextStyle(fontSize: 14)),
+                    const SizedBox(height: RealCmSpacing.s3),
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 240),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
+                        borderRadius: BorderRadius.circular(RealCmRadius.md),
+                      ),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: dups.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (_, i) {
+                          final d = dups[i];
+                          final birth = d.birthDate;
+                          return ListTile(
+                            dense: true,
+                            leading: const Icon(RealCmIcons.member, size: 18),
+                            title: Text(d.displayName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                            subtitle: Text(
+                              [
+                                if (birth != null) DateFormat('dd/MM/yyyy', 'vi').format(birth),
+                                if (d.fatherNameText != null) 'Cha: ${d.fatherNameText}',
+                              ].join(' · '),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Huỷ — sửa lại')),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: RealCmColors.warning, foregroundColor: Colors.white),
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: const Text('Vẫn tạo mới'),
+                ),
+              ],
+            ),
+          );
+          if (proceed != true) {
+            setState(() => _saving = false);
+            return;
+          }
+        }
+      } catch (_) {
+        // Duplicate check không bắt buộc — bỏ qua nếu lỗi
+      }
+    }
+
     try {
       final data = <String, dynamic>{
         'saint_name': _saintCtrl.text.trim(),
