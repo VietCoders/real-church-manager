@@ -61,6 +61,8 @@ class CollectionConfig {
     this.iconColor,
     this.onPrintCertificate,
     this.detailRoutePrefix,
+    this.extraFilter,
+    this.defaults = const {},
   });
 
   /// Tên collection PocketBase.
