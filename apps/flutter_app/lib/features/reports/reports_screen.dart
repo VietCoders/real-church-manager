@@ -408,6 +408,7 @@ class _SacramentYearReportState extends ConsumerState<_SacramentYearReport> {
   @override
   Widget build(BuildContext context) {
     final years = List.generate(5, (i) => DateTime.now().year - i);
+    const labels = ['Rửa Tội', 'Thêm Sức', 'Hôn Phối', 'Xức Dầu', 'An Táng'];
     return _ReportFrame(
       title: 'Bí Tích theo năm',
       headerActions: [
@@ -423,12 +424,18 @@ class _SacramentYearReportState extends ConsumerState<_SacramentYearReport> {
           },
         ),
       ],
+      onExport: () async {
+        final d = await _load();
+        if (!context.mounted) return;
+        await _exportReportPdf(context, 'Bí Tích theo năm',
+          List.generate(labels.length, (i) => MapEntry(labels[i], '${d[i]}')),
+          caption: 'Năm $_year');
+      },
       child: FutureBuilder<List<int>>(
         future: _future,
         builder: (ctx, snap) {
           if (!snap.hasData) return const Center(child: CircularProgressIndicator());
           final d = snap.data!;
-          final labels = ['Rửa Tội', 'Thêm Sức', 'Hôn Phối', 'Xức Dầu', 'An Táng'];
           final colors = [RealCmColors.info, RealCmColors.danger, RealCmColors.accent, RealCmColors.warning, RealCmColors.textMuted];
           final maxY = d.fold<int>(0, (m, v) => v > m ? v : m).toDouble();
           return Column(children: [
