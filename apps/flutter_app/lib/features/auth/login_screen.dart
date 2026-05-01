@@ -120,7 +120,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     validator: (v) => (v == null || v.isEmpty) ? t.authPasswordRequired : null,
                     onFieldSubmitted: (_) => _submit(),
                   ),
-                  const SizedBox(height: RealCmSpacing.s5),
+                  const SizedBox(height: RealCmSpacing.s2),
+                  Row(children: [
+                    Checkbox(
+                      value: _remember,
+                      onChanged: (v) => setState(() => _remember = v ?? false),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _remember = !_remember),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Text('Lưu tên đăng nhập', style: TextStyle(fontSize: 14)),
+                        ),
+                      ),
+                    ),
+                  ]),
+                  const SizedBox(height: RealCmSpacing.s3),
                   ElevatedButton(
                     onPressed: _loading ? null : _submit,
                     child: _loading
