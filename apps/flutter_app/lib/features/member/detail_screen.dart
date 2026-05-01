@@ -10,8 +10,10 @@ import '../../design/tokens.dart';
 import '../../domain/member/entity.dart';
 import '../../platform/pocketbase/auth.dart';
 import '../../platform/pocketbase/client.dart';
+import '../../ui/crud/collection_crud.dart';
 import '../../ui/scaffold/app_shell.dart';
 import '../../ui/toast/service.dart';
+import '../modules/configs.dart' as cfg;
 import 'member_form.dart';
 
 class _SacramentEntry {
