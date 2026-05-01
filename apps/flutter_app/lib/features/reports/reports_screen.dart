@@ -600,10 +600,11 @@ class _MassIntentionsReport extends ConsumerWidget {
 }
 
 class _ReportFrame extends StatelessWidget {
-  const _ReportFrame({required this.title, required this.child, this.headerActions});
+  const _ReportFrame({required this.title, required this.child, this.headerActions, this.onExport});
   final String title;
   final Widget child;
   final List<Widget>? headerActions;
+  final VoidCallback? onExport;
 
   @override
   Widget build(BuildContext context) {
@@ -620,8 +621,8 @@ class _ReportFrame extends StatelessWidget {
           const SizedBox(width: RealCmSpacing.s2),
           OutlinedButton.icon(
             icon: const Icon(RealCmIcons.print, size: 18),
-            label: const Text('In / Xuất'),
-            onPressed: () => realCmToast(context, 'Tính năng xuất PDF/Excel sẽ làm v1.0.x', type: RealCmToastType.info),
+            label: const Text('Xuất PDF'),
+            onPressed: onExport,
           ),
         ]),
       ),
