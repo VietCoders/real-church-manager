@@ -160,6 +160,24 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
               ],
             ),
           ),
+          // Quick filter status
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: RealCmSpacing.s4, vertical: RealCmSpacing.s2),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(children: [
+                _statusChip(label: 'Tất cả', value: null),
+                _statusChip(label: 'Đang sinh hoạt', value: 'active'),
+                _statusChip(label: 'Đã chuyển', value: 'moved_out'),
+                _statusChip(label: 'Đã qua đời', value: 'deceased'),
+                _statusChip(label: 'Vạ tuyệt thông', value: 'excommunicated'),
+              ]),
+            ),
+          ),
           Expanded(
             child: asyncList.when(
               loading: () => const Center(child: CircularProgressIndicator()),
