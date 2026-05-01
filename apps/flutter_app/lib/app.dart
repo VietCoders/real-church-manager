@@ -59,6 +59,7 @@ final realCmRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/preferences', builder: (_, __) => const PreferencesScreen()),
       GoRoute(path: '/users', builder: (_, __) => const UserManagementScreen()),
       GoRoute(path: '/activity-log', builder: (_, __) => const ActivityLogScreen()),
+      GoRoute(path: '/sync-queue', builder: (_, __) => const SyncQueueScreen()),
       GoRoute(path: '/calendar', builder: (_, __) => const LiturgicalCalendarScreen()),
       GoRoute(path: '/reports', builder: (_, __) => const ReportsScreen()),
 
