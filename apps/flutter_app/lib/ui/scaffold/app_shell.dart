@@ -86,6 +86,8 @@ class RealCmAppShell extends ConsumerWidget {
       ],
     );
 
+    final wrappedBody = _OfflineBannerWrapper(child: body);
+
     if (isDesktop) {
       return Scaffold(
         body: Row(
@@ -95,7 +97,7 @@ class RealCmAppShell extends ConsumerWidget {
             Expanded(
               child: Scaffold(
                 appBar: appBar,
-                body: body,
+                body: wrappedBody,
                 floatingActionButton: floatingActionButton,
               ),
             ),
@@ -112,7 +114,7 @@ class RealCmAppShell extends ConsumerWidget {
             Expanded(
               child: Scaffold(
                 appBar: appBar,
-                body: body,
+                body: wrappedBody,
                 floatingActionButton: floatingActionButton,
               ),
             ),
@@ -123,9 +125,44 @@ class RealCmAppShell extends ConsumerWidget {
     return Scaffold(
       appBar: appBar,
       drawer: _MobileDrawer(currentRoute: currentRoute, role: auth.role ?? 'guest'),
-      body: body,
+      body: wrappedBody,
       floatingActionButton: floatingActionButton,
     );
+  }
+}
+
+class _OfflineBannerWrapper extends ConsumerWidget {
+  const _OfflineBannerWrapper({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final health = ref.watch(serverHealthProvider);
+    if (health.status != ServerHealth.unhealthy) return child;
+    return Column(children: [
+      Material(
+        color: RealCmColors.danger,
+        child: InkWell(
+          onTap: () => ref.read(serverHealthProvider.notifier).ping(),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: RealCmSpacing.s4, vertical: RealCmSpacing.s2),
+            child: Row(children: [
+              const Icon(Icons.cloud_off, color: Colors.white, size: 18),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Mất kết nối tới máy chủ — dữ liệu mới sẽ tự đồng bộ khi có mạng. Nhấn để thử lại.',
+                  style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+              ),
+              const Icon(Icons.refresh, color: Colors.white, size: 18),
+            ]),
+          ),
+        ),
+      ),
+      Expanded(child: child),
+    ]);
   }
 }
 
