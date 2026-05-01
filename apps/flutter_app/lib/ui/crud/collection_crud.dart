@@ -155,14 +155,20 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
     try {
       final pb = RealCmPocketBase.instance();
       if (widget.config.softDelete) {
-        await pb.collection(widget.config.collection).update(rec.id, body: {
+        await safePbUpdate(pb, widget.config.collection, rec.id, {
           'deleted_at': DateTime.now().toIso8601String(),
         });
       } else {
-        await pb.collection(widget.config.collection).delete(rec.id);
+        await safePbDelete(pb, widget.config.collection, rec.id);
       }
       if (mounted) {
         realCmToast(context, 'Đã xoá', type: RealCmToastType.success);
+        _refresh();
+      }
+    } on OfflineQueuedException catch (e) {
+      ref.read(pendingSyncCountProvider.notifier).state = RealCmSyncQueue.instance.pendingCount();
+      if (mounted) {
+        realCmToast(context, e.message, type: RealCmToastType.warning);
         _refresh();
       }
     } catch (e) {
