@@ -10,6 +10,7 @@ import 'features/auth/login_screen.dart';
 import 'features/calendar/calendar_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/district/list_screen.dart';
+import 'features/member/detail_screen.dart';
 import 'features/member/list_screen.dart';
 import 'features/modules/configs.dart' as cfg;
 import 'features/reports/reports_screen.dart';
