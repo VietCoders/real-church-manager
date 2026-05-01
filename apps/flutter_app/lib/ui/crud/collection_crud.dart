@@ -475,21 +475,38 @@ class _CrudFormDialogState extends ConsumerState<CrudFormDialogPublic> {
     );
   }
 
+  InputDecoration _decoration(CrudFieldConfig f, {Widget? suffixIcon, bool alignLabelWithHint = false}) {
+    return InputDecoration(
+      labelText: f.required ? '${f.label} *' : f.label,
+      hintText: f.hint,
+      helperText: f.helper,
+      errorText: _fieldErrors[f.name],
+      suffixIcon: suffixIcon,
+      alignLabelWithHint: alignLabelWithHint,
+    );
+  }
+
   Widget _buildField(CrudFieldConfig f, DateFormat df) {
     switch (f.type) {
       case CrudFieldType.textarea:
         return TextFormField(
           controller: _ctrls[f.name],
-          decoration: InputDecoration(labelText: f.required ? '${f.label} *' : f.label, hintText: f.hint, helperText: f.helper, alignLabelWithHint: true),
+          decoration: _decoration(f, alignLabelWithHint: true),
           maxLines: f.maxLines ?? 3,
           validator: f.required ? (v) => (v == null || v.trim().isEmpty) ? 'Bắt buộc' : null : null,
+          onChanged: (_) {
+            if (_fieldErrors.remove(f.name) != null) setState(() {});
+          },
         );
       case CrudFieldType.number:
         return TextFormField(
           controller: _ctrls[f.name],
-          decoration: InputDecoration(labelText: f.required ? '${f.label} *' : f.label, hintText: f.hint, helperText: f.helper),
+          decoration: _decoration(f),
           keyboardType: TextInputType.number,
           validator: f.required ? (v) => (v == null || v.trim().isEmpty) ? 'Bắt buộc' : null : null,
+          onChanged: (_) {
+            if (_fieldErrors.remove(f.name) != null) setState(() {});
+          },
         );
       case CrudFieldType.date:
       case CrudFieldType.datetime:
