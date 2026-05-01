@@ -119,6 +119,14 @@ class DashboardWidgetRegistry {
       defaultSize: DashboardWidgetSize.lg,
       builder: (ref, spec) => UpcomingFeastDaysList(spec: spec),
     ),
+    'finance.cash_flow': DashboardWidgetMeta(
+      type: 'finance.cash_flow',
+      title: 'Cash flow tháng',
+      description: 'Thu/Chi tháng hiện tại + biểu đồ 6 tháng gần nhất',
+      icon: Icons.account_balance_wallet_outlined,
+      defaultSize: DashboardWidgetSize.lg,
+      builder: (ref, spec) => CashFlowCard(spec: spec),
+    ),
   };
 
   static Map<String, DashboardWidgetMeta> get all => Map.unmodifiable(_registry);
