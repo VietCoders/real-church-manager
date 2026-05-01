@@ -1,7 +1,12 @@
 // Field config — define schema cho generic CRUD form.
 import 'package:flutter/material.dart';
+import 'package:pocketbase/pocketbase.dart';
 
 enum CrudFieldType { text, textarea, number, date, datetime, select, relation, bool }
+
+/// Callback in chứng chỉ Bí Tích cho 1 record. Tuỳ sổ tự fetch dữ liệu liên quan
+/// (member name, parish info) rồi gọi Printing.layoutPdf qua RealCmCertificateBuilder.
+typedef CertificatePrinter = Future<void> Function(BuildContext ctx, RecordModel rec);
 
 class CrudFieldConfig {
   const CrudFieldConfig({
