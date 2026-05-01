@@ -192,7 +192,7 @@ class _OverviewReport extends ConsumerWidget {
           MapEntry('Rửa Tội $yr', '${d[3]}'),
           MapEntry('Hôn Phối $yr', '${d[4]}'),
           MapEntry('An Táng $yr', '${d[5]}'),
-        ], caption: 'Năm $yr');
+        ], caption: 'Năm $yr', chartType: ReportChartType.bar);
       },
       child: FutureBuilder(
         future: Future.wait([
