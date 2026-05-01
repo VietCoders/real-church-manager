@@ -719,6 +719,14 @@ class _MassIntentionsReport extends ConsumerWidget {
           ..add(MapEntry('Tổng', '$total'));
         await _exportReportPdf(context, 'Lễ ý cầu nguyện', rows, chartType: ReportChartType.pie);
       },
+      onExportExcel: () async {
+        final m = await _load();
+        if (!context.mounted) return;
+        final total = m.values.fold<int>(0, (s, v) => s + v);
+        final rows = m.entries.map((e) => MapEntry(labels[e.key]!, '${e.value}')).toList()
+          ..add(MapEntry('Tổng', '$total'));
+        await _exportReportExcel(context, 'Lễ ý cầu nguyện', rows);
+      },
       child: FutureBuilder<Map<String, int>>(
         future: _load(),
         builder: (ctx, snap) {
