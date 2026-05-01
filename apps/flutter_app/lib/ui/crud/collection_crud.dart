@@ -330,6 +330,8 @@ class _CrudFormDialogState extends ConsumerState<CrudFormDialogPublic> {
   final _formKey = GlobalKey<FormState>();
   final _values = <String, dynamic>{};
   final _ctrls = <String, TextEditingController>{};
+  final _fieldErrors = <String, String>{};
+  String? _formError;
   bool _saving = false;
 
   @override
