@@ -45,7 +45,8 @@ Future<void> _exportReportPdf(
       rows: rows,
       chartType: chartType,
     );
-    await RealCmReportPdfBuilder.print(doc, jobName: title);
+    if (!ctx.mounted) return;
+    await realCmShowPdfPreview(ctx, title: title, document: doc);
   } catch (e) {
     if (ctx.mounted) realCmToast(ctx, 'Lỗi xuất PDF: $e', type: RealCmToastType.error);
   }
