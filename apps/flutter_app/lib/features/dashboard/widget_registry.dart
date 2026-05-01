@@ -14,6 +14,7 @@ import 'widgets/members_by_age_chart.dart';
 import 'widgets/members_by_gender_chart.dart';
 import 'widgets/recent_baptisms_list.dart';
 import 'widgets/upcoming_birthdays_list.dart';
+import 'widgets/upcoming_feast_days_list.dart';
 
 class DashboardWidgetMeta {
   const DashboardWidgetMeta({
