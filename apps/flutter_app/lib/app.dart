@@ -20,6 +20,7 @@ import 'l10n/generated/app_localizations.dart';
 import 'platform/pocketbase/auth.dart';
 import 'platform/storage/preferences.dart';
 import 'ui/crud/collection_crud.dart';
+import 'ui/scaffold/nav_destinations.dart';
 
 final realCmRouterProvider = Provider<GoRouter>((ref) {
   final auth = ref.watch(realCmAuthProvider);
