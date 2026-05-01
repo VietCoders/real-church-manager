@@ -248,6 +248,89 @@ final massIntentionConfig = CollectionConfig(
   ],
 );
 
+// ─── Gia đình ─────────────────────────────────────────────
+final familyConfig = CollectionConfig(
+  collection: 'families',
+  title: 'Gia đình',
+  icon: RealCmIcons.family,
+  iconColor: RealCmColors.primary,
+  itemSingular: 'gia đình',
+  searchHint: 'Tìm theo tên gia đình, địa chỉ...',
+  searchFields: const ['family_name', 'address', 'phone'],
+  primaryDisplay: (d) => d['family_name']?.toString().isNotEmpty == true ? d['family_name']!.toString() : 'Gia đình (chưa đặt tên)',
+  secondaryDisplay: (d) => [
+    if (d['address']?.toString().isNotEmpty == true) d['address'],
+    if (d['phone']?.toString().isNotEmpty == true) d['phone'],
+  ].join(' · '),
+  softDelete: true,
+  sort: 'family_name',
+  fields: const [
+    CrudFieldConfig(name: 'family_name', label: 'Tên gia đình', helper: 'Vd: Gia đình ông Phêrô Nguyễn Văn A', section: 'Thông tin chung'),
+    CrudFieldConfig(name: 'head_id', label: 'Gia trưởng', type: CrudFieldType.relation, required: true, relationCollection: 'members', relationDisplayField: 'full_name', section: 'Thông tin chung'),
+    CrudFieldConfig(name: 'district_id', label: 'Giáo họ', type: CrudFieldType.relation, relationCollection: 'districts', relationDisplayField: 'name', section: 'Thông tin chung'),
+
+    CrudFieldConfig(name: 'address', label: 'Địa chỉ', section: 'Liên hệ', flex: 2),
+    CrudFieldConfig(name: 'phone', label: 'Điện thoại', section: 'Liên hệ', flex: 1),
+
+    CrudFieldConfig(name: 'notes', label: 'Ghi chú', type: CrudFieldType.textarea, section: 'Ghi chú'),
+  ],
+);
+
+// ─── Lịch phụng vụ (events list — calendar view riêng) ────
+final liturgicalConfig = CollectionConfig(
+  collection: 'liturgical_events',
+  title: 'Lịch phụng vụ',
+  icon: RealCmIcons.calendar,
+  iconColor: RealCmColors.primary,
+  itemSingular: 'sự kiện',
+  searchHint: 'Tìm theo tiêu đề, cha chủ sự...',
+  searchFields: const ['title', 'priest_name'],
+  primaryDisplay: (d) => d['title']?.toString() ?? '',
+  secondaryDisplay: (d) {
+    final type = d['event_type']?.toString() ?? '';
+    final typeLabel = {
+      'mass_regular': 'Lễ thường',
+      'mass_solemn': 'Lễ trọng',
+      'mass_feast': 'Lễ kính',
+      'confession': 'Xưng tội',
+      'adoration': 'Chầu Thánh Thể',
+      'meeting': 'Họp',
+      'other': 'Khác',
+    }[type] ?? type;
+    return '${_date(d['event_date'])} · $typeLabel${d['priest_name']?.toString().isNotEmpty == true ? ' · ${d['priest_name']}' : ''}';
+  },
+  sort: '-event_date',
+  fields: const [
+    CrudFieldConfig(name: 'title', label: 'Tiêu đề', required: true, helper: 'Vd: Lễ Chúa Nhật, Lễ Phục Sinh...', section: 'Thông tin chung'),
+    CrudFieldConfig(name: 'event_date', label: 'Ngày bắt đầu', type: CrudFieldType.date, required: true, section: 'Thông tin chung', flex: 1),
+    CrudFieldConfig(name: 'end_date', label: 'Ngày kết thúc', type: CrudFieldType.date, helper: 'Bỏ trống nếu chỉ 1 ngày', section: 'Thông tin chung', flex: 1),
+    CrudFieldConfig(name: 'event_type', label: 'Loại', type: CrudFieldType.select, required: true, section: 'Thông tin chung', options: [
+      (value: 'mass_regular', label: 'Lễ thường'),
+      (value: 'mass_solemn', label: 'Lễ trọng'),
+      (value: 'mass_feast', label: 'Lễ kính'),
+      (value: 'confession', label: 'Xưng tội'),
+      (value: 'adoration', label: 'Chầu Thánh Thể'),
+      (value: 'meeting', label: 'Họp'),
+      (value: 'other', label: 'Khác'),
+    ]),
+
+    CrudFieldConfig(name: 'liturgical_color', label: 'Màu phụng vụ', type: CrudFieldType.select, section: 'Phụng vụ', options: [
+      (value: 'white', label: 'Trắng (lễ Chúa, Đức Mẹ, các Thánh)'),
+      (value: 'red', label: 'Đỏ (Hiện Xuống, tử đạo, Lễ Lá)'),
+      (value: 'green', label: 'Xanh (Mùa Thường Niên)'),
+      (value: 'purple', label: 'Tím (Mùa Vọng, Mùa Chay)'),
+      (value: 'rose', label: 'Hồng (CN Vui mừng)'),
+      (value: 'black', label: 'Đen (lễ an táng)'),
+    ]),
+    CrudFieldConfig(name: 'priest_name', label: 'Cha chủ sự', section: 'Phụng vụ'),
+
+    CrudFieldConfig(name: 'is_recurring', label: 'Lặp lại định kỳ', type: CrudFieldType.bool, helper: 'Vd: lễ Chúa Nhật hàng tuần', section: 'Lặp lại'),
+    CrudFieldConfig(name: 'recurrence_rule', label: 'Quy tắc lặp', helper: 'Tuỳ chọn: FREQ=WEEKLY;BYDAY=SU', section: 'Lặp lại'),
+
+    CrudFieldConfig(name: 'notes', label: 'Ghi chú', type: CrudFieldType.textarea, section: 'Ghi chú'),
+  ],
+);
+
 // ─── Sổ thu chi ───────────────────────────────────────────
 final donationConfig = CollectionConfig(
   collection: 'donations',
