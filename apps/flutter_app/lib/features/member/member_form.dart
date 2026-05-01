@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/validators.dart';
 import '../../data/member/repository.dart';
 import '../../design/icons.dart';
 import '../../design/tokens.dart';
