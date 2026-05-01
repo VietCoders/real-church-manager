@@ -107,6 +107,21 @@ class FamilyDetailScreen extends ConsumerWidget {
     return RealCmAppShell(
       title: 'Chi tiết gia đình',
       actions: [
+        if (canEdit)
+          IconButton(
+            icon: const Icon(RealCmIcons.edit),
+            tooltip: 'Sửa thông tin gia đình',
+            onPressed: () async {
+              final family = async.value?.family;
+              if (family == null) return;
+              final ok = await showDialog<bool>(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => CrudFormDialogPublic(config: cfg.familyConfig, existing: family),
+              );
+              if (ok == true) ref.invalidate(_familyDetailProvider(familyId));
+            },
+          ),
         IconButton(
           icon: const Icon(RealCmIcons.refresh),
           onPressed: () => ref.invalidate(_familyDetailProvider(familyId)),
