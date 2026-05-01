@@ -25,9 +25,10 @@ class _SacramentEntry {
 }
 
 class _DetailData {
-  _DetailData({required this.member, required this.sacraments, this.familyName, this.districtName});
+  _DetailData({required this.member, required this.sacraments, required this.donations, this.familyName, this.districtName});
   final Member member;
   final List<_SacramentEntry> sacraments;
+  final List<RecordModel> donations;
   final String? familyName;
   final String? districtName;
 }
