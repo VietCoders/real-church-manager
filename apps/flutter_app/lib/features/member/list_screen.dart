@@ -43,6 +43,7 @@ class MemberListScreen extends ConsumerStatefulWidget {
 class _MemberListScreenState extends ConsumerState<MemberListScreen> {
   String _search = '';
   String? _statusFilter = 'active'; // mặc định chỉ hiện active
+  bool _showDeleted = false;
   final _searchCtrl = TextEditingController();
 
   @override
