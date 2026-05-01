@@ -42,7 +42,37 @@ function summarize(collection, record) {
   return collection;
 }
 
-function writeLog(app, op, collection, record, authId) {
+// Cache trạng thái record trước update để diff
+const _beforeCache = new Map();
+
+function snapshotRecord(record) {
+  try {
+    const out = {};
+    const data = record.publicExport ? record.publicExport() : {};
+    for (const k of Object.keys(data)) {
+      // Bỏ các field cồng kềnh hoặc auto
+      if (['expand', 'collectionId', 'collectionName'].indexOf(k) >= 0) continue;
+      out[k] = data[k];
+    }
+    return out;
+  } catch (_) { return {}; }
+}
+
+function diffRecords(before, after) {
+  const changes = {};
+  const allKeys = new Set([...Object.keys(before || {}), ...Object.keys(after || {})]);
+  for (const k of allKeys) {
+    if (k === 'updated' || k === 'created') continue;
+    const a = before ? before[k] : undefined;
+    const b = after ? after[k] : undefined;
+    const sa = JSON.stringify(a);
+    const sb = JSON.stringify(b);
+    if (sa !== sb) changes[k] = { from: a, to: b };
+  }
+  return changes;
+}
+
+function writeLog(app, op, collection, record, authId, changes) {
   try {
     const dao = new Dao(app.dao().db());
     const col = dao.findCollectionByNameOrId('activity_logs');
@@ -52,7 +82,9 @@ function writeLog(app, op, collection, record, authId) {
     log.set('record_id', record.id);
     if (authId) log.set('user_id', authId);
     log.set('summary', `${op === 'create' ? '➕' : op === 'update' ? '✏️' : '🗑️'} ${summarize(collection, record)}`);
-    log.set('meta', { record_data: record.publicExport ? record.publicExport() : {} });
+    const meta = { record_data: snapshotRecord(record) };
+    if (changes && Object.keys(changes).length > 0) meta.changes = changes;
+    log.set('meta', meta);
     dao.saveRecord(log);
   } catch (e) {
     console.log('activity_logger err: ' + e);
