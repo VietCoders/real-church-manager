@@ -355,6 +355,67 @@ class PreferencesScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _checkUpdate(BuildContext context) async {
+    realCmToast(context, 'Đang kiểm tra...', type: RealCmToastType.info);
+    final result = await checkForUpdate();
+    if (!context.mounted) return;
+    if (result.error != null) {
+      realCmToast(context, 'Lỗi: ${result.error}', type: RealCmToastType.error);
+      return;
+    }
+    if (!result.hasUpdate) {
+      realCmToast(context, 'Bạn đang dùng phiên bản mới nhất (${result.current})', type: RealCmToastType.success);
+      return;
+    }
+    final latest = result.latest!;
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.system_update, size: 40, color: RealCmColors.primary),
+        title: Text('Có bản ${latest.tag}'),
+        content: SizedBox(
+          width: 480,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Phiên bản hiện tại: ${result.current}'),
+              Text('Phiên bản mới: ${latest.tag}'),
+              if (latest.publishedAt != null)
+                Text('Phát hành: ${latest.publishedAt!.toLocal()}',
+                    style: const TextStyle(fontSize: 12, color: RealCmColors.textMuted)),
+              if (latest.body != null && latest.body!.isNotEmpty) ...[
+                const SizedBox(height: RealCmSpacing.s3),
+                const Text('Thay đổi:', style: TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  padding: const EdgeInsets.all(RealCmSpacing.s2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(RealCmRadius.md),
+                  ),
+                  child: SingleChildScrollView(child: Text(latest.body!, style: const TextStyle(fontSize: 12))),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Để sau')),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.open_in_new, size: 18),
+            label: const Text('Mở trang tải về'),
+            onPressed: () async {
+              if (await canLaunchUrlString(latest.htmlUrl)) await launchUrlString(latest.htmlUrl);
+              if (ctx.mounted) Navigator.of(ctx).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   String _roleLabel(String role) => {
     'priest_pastor': 'Cha xứ',
     'priest_assistant': 'Cha phó',
@@ -388,6 +449,24 @@ class _Section extends StatelessWidget {
         const SizedBox(height: RealCmSpacing.s3),
         ...children,
       ]),
+    );
+  }
+}
+
+class _AboutVersionTile extends StatelessWidget {
+  const _AboutVersionTile();
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<AppVersionInfo>(
+      future: getCurrentVersion(),
+      builder: (_, snap) {
+        final v = snap.data?.full ?? '...';
+        return ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Phiên bản'),
+          trailing: Text(v, style: const TextStyle(fontFeatures: [FontFeature.tabularFigures()])),
+        );
+      },
     );
   }
 }
