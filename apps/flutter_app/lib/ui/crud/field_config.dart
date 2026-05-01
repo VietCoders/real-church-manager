@@ -89,4 +89,8 @@ class CollectionConfig {
   final bool softDelete;
   /// Khi set, list hiển thị thêm action "In chứng chỉ" cho mỗi record.
   final CertificatePrinter? onPrintCertificate;
+
+  /// Khi set, click vào record sẽ navigate `<detailRoutePrefix>/<id>` thay vì mở edit form.
+  /// VD: '/families' → navigate /families/<id>.
+  final String? detailRoutePrefix;
 }
