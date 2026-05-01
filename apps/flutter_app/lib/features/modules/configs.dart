@@ -127,6 +127,7 @@ final anointingConfig = CollectionConfig(
   primaryDisplay: (d) => 'Xức Dầu ${_date(d['anointing_date'])}',
   secondaryDisplay: (d) => 'Cha: ${d['priest_name'] ?? ''} · ${d['anointing_place'] ?? ''}',
   sort: '-anointing_date',
+  onPrintCertificate: printAnointingCertificate,
   fields: const [
     CrudFieldConfig(name: 'anointing_date', label: 'Ngày xức dầu', type: CrudFieldType.date, required: true, section: 'Thông tin chung', flex: 1),
     CrudFieldConfig(name: 'priest_name', label: 'Cha cử hành', required: true, section: 'Thông tin chung', flex: 1),
