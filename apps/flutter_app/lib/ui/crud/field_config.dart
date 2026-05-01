@@ -95,4 +95,10 @@ class CollectionConfig {
   /// Khi set, click vào record sẽ navigate `<detailRoutePrefix>/<id>` thay vì mở edit form.
   /// VD: '/families' → navigate /families/<id>.
   final String? detailRoutePrefix;
+
+  /// Filter PB thêm khi load list (vd `type = "expense"` để chia 1 collection thành nhiều view).
+  final String? extraFilter;
+
+  /// Default values khi tạo mới (auto-fill các field, vd `type: 'expense'`).
+  final Map<String, dynamic> defaults;
 }
