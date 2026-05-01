@@ -129,8 +129,10 @@ class _ActivityLogScreenState extends ConsumerState<ActivityLogScreen> {
                   final userName = (exp != null && exp.isNotEmpty)
                       ? (exp.first.data['name']?.toString() ?? exp.first.data['username']?.toString() ?? 'Không rõ')
                       : 'Không rõ';
-                  return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: RealCmSpacing.s4, vertical: 4),
+                  final meta = log.data['meta'];
+                  final changes = (meta is Map ? meta['changes'] : null) as Map?;
+                  return ExpansionTile(
+                    tilePadding: const EdgeInsets.symmetric(horizontal: RealCmSpacing.s4, vertical: 4),
                     leading: CircleAvatar(
                       backgroundColor: _opColor(op).withValues(alpha: 0.15),
                       child: Icon(_opIcon(op), color: _opColor(op), size: 18),
@@ -143,6 +145,47 @@ class _ActivityLogScreenState extends ConsumerState<ActivityLogScreen> {
                         style: const TextStyle(fontSize: 12, color: RealCmColors.textMuted),
                       ),
                     ),
+                    childrenPadding: const EdgeInsets.fromLTRB(72, 0, 16, 12),
+                    children: [
+                      if (changes != null && changes.isNotEmpty)
+                        for (final entry in changes.entries)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              SizedBox(
+                                width: 140,
+                                child: Text(_fieldLabel(entry.key.toString()),
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: RealCmColors.textMuted)),
+                              ),
+                              Expanded(
+                                child: Wrap(spacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: RealCmColors.danger.withValues(alpha: 0.10),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(_fmtVal((entry.value as Map)['from']),
+                                        style: const TextStyle(fontSize: 12, color: RealCmColors.danger)),
+                                  ),
+                                  const Icon(Icons.arrow_forward, size: 12, color: RealCmColors.textMuted),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: RealCmColors.success.withValues(alpha: 0.10),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(_fmtVal((entry.value as Map)['to']),
+                                        style: const TextStyle(fontSize: 12, color: RealCmColors.success)),
+                                  ),
+                                ]),
+                              ),
+                            ]),
+                          )
+                      else
+                        const Text('(Không có thay đổi field nào ghi nhận được)',
+                            style: TextStyle(fontSize: 12, color: RealCmColors.textMuted)),
+                    ],
                   );
                 },
               );
