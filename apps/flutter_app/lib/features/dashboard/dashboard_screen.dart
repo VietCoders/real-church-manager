@@ -171,8 +171,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     children: visible.map((spec) {
                       final meta = DashboardWidgetRegistry.meta(spec.type);
                       return SizedBox(
-                        width: _widthFor(spec.size, available),
-                        height: _heightFor(spec.size),
+                        width: DashboardScreen._widthFor(spec.size, available),
+                        height: DashboardScreen._heightFor(spec.size),
                         child: meta == null
                             ? _UnknownWidget(type: spec.type)
                             : meta.builder(ref, spec),
