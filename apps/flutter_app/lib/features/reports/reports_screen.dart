@@ -159,14 +159,32 @@ class _ReportItem extends ConsumerWidget {
 }
 
 // ─── Tổng quan ────────────────────────────────────────────
-class _OverviewReport extends ConsumerWidget {
+class _OverviewReport extends ConsumerStatefulWidget {
   const _OverviewReport();
+  @override
+  ConsumerState<_OverviewReport> createState() => _OverviewReportState();
+}
+
+class _OverviewReportState extends ConsumerState<_OverviewReport> {
+  List<int>? _data;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final repo = ref.read(_statsRepoProvider);
+    final yr = DateTime.now().year;
     return _ReportFrame(
       title: 'Tổng quan giáo xứ',
+      onExport: _data == null ? null : () {
+        final d = _data!;
+        _exportReportPdf(context, 'Tổng quan giáo xứ', [
+          MapEntry('Giáo dân', '${d[0]}'),
+          MapEntry('Gia đình', '${d[1]}'),
+          MapEntry('Giáo họ', '${d[2]}'),
+          MapEntry('Rửa Tội $yr', '${d[3]}'),
+          MapEntry('Hôn Phối $yr', '${d[4]}'),
+          MapEntry('An Táng $yr', '${d[5]}'),
+        ], caption: 'Năm $yr');
+      },
       child: FutureBuilder(
         future: Future.wait([
           repo.totalActiveMembers(),
@@ -179,7 +197,11 @@ class _OverviewReport extends ConsumerWidget {
         builder: (ctx, snap) {
           if (!snap.hasData) return const Center(child: CircularProgressIndicator());
           final d = snap.data as List<int>;
-          final yr = DateTime.now().year;
+          if (_data == null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) setState(() => _data = d);
+            });
+          }
           return GridView.count(
             crossAxisCount: 3,
             childAspectRatio: 1.6,
