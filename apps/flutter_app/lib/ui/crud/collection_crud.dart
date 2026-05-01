@@ -357,7 +357,11 @@ class _CrudFormDialogState extends ConsumerState<CrudFormDialogPublic> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _formError = null;
+      _fieldErrors.clear();
+    });
     try {
       final body = <String, dynamic>{};
       for (final f in widget.config.fields) {
