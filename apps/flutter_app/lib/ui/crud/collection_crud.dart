@@ -194,16 +194,25 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
                       title: Text(cfg.primaryDisplay(r.data), style: const TextStyle(fontWeight: FontWeight.w600)),
                       subtitle: Text(cfg.secondaryDisplay(r.data),
                           style: const TextStyle(color: RealCmColors.textMuted, fontSize: 13)),
-                      trailing: canEdit
+                      trailing: (canEdit || cfg.onPrintCertificate != null)
                           ? PopupMenuButton<String>(
                               icon: const Icon(RealCmIcons.more),
-                              onSelected: (v) {
+                              onSelected: (v) async {
                                 if (v == 'edit') _showForm(existing: r);
                                 if (v == 'delete') _delete(r);
+                                if (v == 'print') {
+                                  try {
+                                    await cfg.onPrintCertificate!(context, r);
+                                  } catch (e) {
+                                    if (mounted) realCmToast(context, 'Lỗi in chứng chỉ: $e', type: RealCmToastType.error);
+                                  }
+                                }
                               },
-                              itemBuilder: (_) => const [
-                                PopupMenuItem(value: 'edit', child: Text('Sửa')),
-                                PopupMenuItem(value: 'delete', child: Text('Xoá', style: TextStyle(color: RealCmColors.danger))),
+                              itemBuilder: (_) => [
+                                if (cfg.onPrintCertificate != null)
+                                  const PopupMenuItem(value: 'print', child: Row(children: [Icon(Icons.print, size: 18), SizedBox(width: 8), Text('In chứng chỉ')])),
+                                if (canEdit) const PopupMenuItem(value: 'edit', child: Text('Sửa')),
+                                if (canEdit) const PopupMenuItem(value: 'delete', child: Text('Xoá', style: TextStyle(color: RealCmColors.danger))),
                               ],
                             )
                           : null,
