@@ -9,9 +9,11 @@ import '../../design/icons.dart';
 import '../../design/tokens.dart';
 import '../../platform/pocketbase/auth.dart';
 import '../../platform/pocketbase/client.dart';
+import '../../ui/crud/collection_crud.dart';
 import '../../ui/modal/service.dart';
 import '../../ui/scaffold/app_shell.dart';
 import '../../ui/toast/service.dart';
+import '../modules/configs.dart' as cfg;
 
 class _FamilyMemberRow {
   _FamilyMemberRow({
