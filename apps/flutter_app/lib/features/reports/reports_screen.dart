@@ -637,7 +637,6 @@ class _MassIntentionsReport extends ConsumerWidget {
         builder: (ctx, snap) {
           if (!snap.hasData) return const Center(child: CircularProgressIndicator());
           final m = snap.data!;
-          final labels = {'pending': 'Chờ duyệt', 'scheduled': 'Đã xếp lịch', 'done': 'Đã cử hành', 'cancelled': 'Huỷ'};
           final colors = {'pending': RealCmColors.warning, 'scheduled': RealCmColors.info, 'done': RealCmColors.success, 'cancelled': RealCmColors.textMuted};
           final total = m.values.fold<int>(0, (s, v) => s + v);
           if (total == 0) return const Center(child: Text('Chưa có lễ ý nào', style: TextStyle(color: RealCmColors.textMuted)));
