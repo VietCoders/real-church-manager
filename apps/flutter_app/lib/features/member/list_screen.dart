@@ -1,6 +1,7 @@
 // Member list — full CRUD: search + add (modal) + edit (modal) + soft delete (confirm).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/member/repository.dart';
