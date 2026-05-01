@@ -23,12 +23,16 @@ class MemberRepository {
     int perPage = 50,
     String? search,
     String? districtId,
+    String? status,
     String? sort = '-updated',
   }) async {
     final pb = RealCmPocketBase.instance();
     final filters = <String>['deleted_at = null'];
     if (districtId != null && districtId.isNotEmpty) {
       filters.add('district_id = "$districtId"');
+    }
+    if (status != null && status.isNotEmpty) {
+      filters.add('status = "$status"');
     }
     if (search != null && search.trim().isNotEmpty) {
       final q = search.replaceAll('"', '');
