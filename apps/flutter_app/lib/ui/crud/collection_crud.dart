@@ -381,15 +381,45 @@ class _CrudFormDialogState extends ConsumerState<CrudFormDialogPublic> {
       }
       final pb = RealCmPocketBase.instance();
       if (widget.existing == null) {
-        await pb.collection(widget.config.collection).create(body: body);
+        await safePbCreate(pb, widget.config.collection, body);
       } else {
-        await pb.collection(widget.config.collection).update(widget.existing!.id, body: body);
+        await safePbUpdate(pb, widget.config.collection, widget.existing!.id, body);
       }
       if (mounted) Navigator.of(context).pop(true);
+    } on OfflineQueuedException catch (e) {
+      ref.read(pendingSyncCountProvider.notifier).state = RealCmSyncQueue.instance.pendingCount();
+      if (mounted) {
+        realCmToast(context, e.message, type: RealCmToastType.warning);
+        Navigator.of(context).pop(true);
+      }
     } catch (e) {
-      if (mounted) realCmToast(context, 'Lỗi: $e', type: RealCmToastType.error);
-      setState(() => _saving = false);
+      // Parse PB validation error → friendly message
+      _formError = _parsePbError(e);
+      if (mounted) {
+        realCmToast(context, _formError ?? 'Lỗi: $e', type: RealCmToastType.error);
+        setState(() => _saving = false);
+      }
     }
+  }
+
+  String? _parsePbError(Object e) {
+    if (e is ClientException) {
+      final data = e.response['data'];
+      if (data is Map && data.isNotEmpty) {
+        final entries = <String>[];
+        data.forEach((field, info) {
+          final cfgField = widget.config.fields.where((f) => f.name == field).firstOrNull;
+          final label = cfgField?.label ?? field;
+          final msg = (info is Map ? info['message'] : info)?.toString() ?? 'không hợp lệ';
+          entries.add('$label: $msg');
+          _fieldErrors[field.toString()] = msg;
+        });
+        return entries.join(' · ');
+      }
+      final msg = e.response['message']?.toString();
+      if (msg != null && msg.isNotEmpty) return msg;
+    }
+    return null;
   }
 
   @override
