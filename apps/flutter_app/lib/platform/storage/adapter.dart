@@ -28,4 +28,5 @@ class RealCmStorageAdapter {
 
   static Box<dynamic> settings() => Hive.box<dynamic>(boxSettings);
   static Box<dynamic> auth() => Hive.box<dynamic>(boxAuth);
+  static Box<dynamic> offlineQueue() => Hive.box<dynamic>(boxOfflineQueue);
 }
