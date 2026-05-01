@@ -49,6 +49,18 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
     super.dispose();
   }
 
+  Widget _statusChip({required String label, required String? value}) {
+    final selected = _statusFilter == value;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => setState(() => _statusFilter = value),
+      ),
+    );
+  }
+
   Future<void> _addNew() async {
     final result = await showMemberFormModal(context, ref);
     if (result != null) {
