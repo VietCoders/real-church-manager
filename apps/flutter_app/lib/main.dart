@@ -7,12 +7,14 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'app.dart';
 import 'core/logging/logger.dart';
 import 'platform/storage/adapter.dart';
+import 'platform/sync/queue.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   RealCmLogger.init();
   await Hive.initFlutter();
   await RealCmStorageAdapter.openCoreBoxes();
+  RealCmSyncQueue.instance.start();
 
   runApp(const ProviderScope(child: RealCmApp()));
 }
