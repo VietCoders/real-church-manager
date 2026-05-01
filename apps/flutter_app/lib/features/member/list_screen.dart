@@ -185,7 +185,7 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
                               ],
                             )
                           : null,
-                      onTap: canEdit ? () => _edit(m) : null,
+                      onTap: () => context.push('/members/${m.id}'),
                     );
                   },
                 );
