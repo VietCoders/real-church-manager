@@ -35,6 +35,7 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
   String _search = '';
   late final TextEditingController _searchCtrl;
   Timer? _debounceTimer;
+  bool _showDeleted = false;
 
   final List<RecordModel> _items = [];
   int _page = 1;
