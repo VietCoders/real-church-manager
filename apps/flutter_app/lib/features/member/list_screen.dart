@@ -52,6 +52,18 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
     super.dispose();
   }
 
+  Future<void> _restore(Member m) async {
+    try {
+      await ref.read(memberRepoProvider).restore(m.id);
+      if (mounted) {
+        realCmToast(context, 'Đã khôi phục ${m.displayName}', type: RealCmToastType.success);
+        ref.invalidate(_memberListProvider);
+      }
+    } catch (e) {
+      if (mounted) realCmToast(context, 'Lỗi: $e', type: RealCmToastType.error);
+    }
+  }
+
   Widget _statusFilterChip({required String label, required String? value}) {
     final selected = _statusFilter == value;
     return Padding(
