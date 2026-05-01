@@ -338,20 +338,25 @@ final liturgicalConfig = CollectionConfig(
   ],
 );
 
-// ─── Sổ thu chi ───────────────────────────────────────────
-final donationConfig = CollectionConfig(
+// ─── Sổ Thu (income) ──────────────────────────────────────
+const _paymentMethodOptions = [
+  (value: 'cash', label: 'Tiền mặt'),
+  (value: 'bank_transfer', label: 'Chuyển khoản'),
+  (value: 'qr_code', label: 'QR Code'),
+  (value: 'other', label: 'Khác'),
+];
+
+final incomeConfig = CollectionConfig(
   collection: 'donations',
-  title: 'Sổ thu chi',
-  icon: RealCmIcons.donation,
+  title: 'Sổ Thu',
+  icon: Icons.arrow_circle_up,
   iconColor: RealCmColors.success,
-  itemSingular: 'phiếu',
+  itemSingular: 'phiếu thu',
   searchHint: 'Tìm theo người dâng, số phiếu, mô tả...',
   searchFields: ['donor_name', 'receipt_no', 'description'],
   primaryDisplay: (d) {
     final amount = (d['amount'] as num?) ?? 0;
-    final type = d['type']?.toString() ?? '';
-    final isExpense = type == 'expense';
-    return '${isExpense ? '- ' : '+ '}${_money(amount)}';
+    return '+ ${_money(amount)}';
   },
   secondaryDisplay: (d) {
     final type = d['type']?.toString() ?? '';
@@ -361,27 +366,82 @@ final donationConfig = CollectionConfig(
       'building_fund': 'Quỹ xây dựng',
       'mass_intention': 'Xin lễ',
       'other_in': 'Thu khác',
-      'expense': 'Chi',
     }[type] ?? type;
-    return '${_date(d['date'])} · $typeLabel · ${d['donor_name'] ?? 'Khuyết danh'}';
+    return '${_date(d['date'])} · $typeLabel · ${d['donor_name']?.toString().isNotEmpty == true ? d['donor_name'] : 'Khuyết danh'}';
   },
   sort: '-date',
+  extraFilter: 'type != "expense"',
+  defaults: const {'type': 'sunday_offering', 'payment_method': 'cash'},
   fields: const [
-    CrudFieldConfig(name: 'date', label: 'Ngày', type: CrudFieldType.date, required: true, section: 'Phiếu', flex: 1),
-    CrudFieldConfig(name: 'receipt_no', label: 'Số phiếu', section: 'Phiếu', flex: 1),
-    CrudFieldConfig(name: 'type', label: 'Loại', type: CrudFieldType.select, required: true, section: 'Phiếu', options: [
-      (value: 'sunday_offering', label: 'Dâng Chúa Nhật'),
-      (value: 'feast_offering', label: 'Dâng lễ trọng'),
-      (value: 'building_fund', label: 'Quỹ xây dựng'),
-      (value: 'mass_intention', label: 'Xin lễ'),
-      (value: 'other_in', label: 'Thu khác'),
-      (value: 'expense', label: 'Chi'),
+    CrudFieldConfig(name: 'date', label: 'Ngày', type: CrudFieldType.date, required: true, section: 'Phiếu thu', flex: 1),
+    CrudFieldConfig(name: 'receipt_no', label: 'Số phiếu', helper: 'Vd: PT-001', section: 'Phiếu thu', flex: 1),
+    CrudFieldConfig(name: 'type', label: 'Loại thu', type: CrudFieldType.select, required: true, section: 'Phiếu thu', options: [
+      (value: 'sunday_offering', label: '🙏 Dâng Chúa Nhật'),
+      (value: 'feast_offering', label: '✨ Dâng lễ trọng'),
+      (value: 'building_fund', label: '🏛️ Quỹ xây dựng'),
+      (value: 'mass_intention', label: '🕯️ Xin lễ'),
+      (value: 'other_in', label: '💰 Thu khác'),
     ]),
-    CrudFieldConfig(name: 'amount', label: 'Số tiền (VND)', type: CrudFieldType.number, required: true, section: 'Phiếu'),
+    CrudFieldConfig(name: 'amount', label: 'Số tiền (VND)', type: CrudFieldType.number, required: true, section: 'Phiếu thu'),
+    CrudFieldConfig(name: 'payment_method', label: 'Hình thức', type: CrudFieldType.select, section: 'Phiếu thu', options: _paymentMethodOptions),
 
-    CrudFieldConfig(name: 'donor_name', label: 'Người dâng / nơi chi', helper: 'Để trống = khuyết danh', section: 'Đối tác'),
-    CrudFieldConfig(name: 'description', label: 'Mô tả', section: 'Đối tác'),
+    CrudFieldConfig(name: 'donor_name', label: 'Người dâng', helper: 'Để trống = khuyết danh', section: 'Người dâng'),
+    CrudFieldConfig(name: 'description', label: 'Mô tả / Ghi chú dâng', helper: 'Vd: Lễ tạ ơn 25 năm hôn phối', section: 'Người dâng'),
 
-    CrudFieldConfig(name: 'notes', label: 'Ghi chú', type: CrudFieldType.textarea, section: 'Ghi chú'),
+    CrudFieldConfig(name: 'notes', label: 'Ghi chú nội bộ', type: CrudFieldType.textarea, section: 'Ghi chú'),
   ],
 );
+
+// ─── Sổ Chi (expense) ─────────────────────────────────────
+final expenseConfig = CollectionConfig(
+  collection: 'donations',
+  title: 'Sổ Chi',
+  icon: Icons.arrow_circle_down,
+  iconColor: RealCmColors.danger,
+  itemSingular: 'phiếu chi',
+  searchHint: 'Tìm theo người nhận, số phiếu, mô tả...',
+  searchFields: ['donor_name', 'receipt_no', 'description'],
+  primaryDisplay: (d) {
+    final amount = (d['amount'] as num?) ?? 0;
+    return '- ${_money(amount)}';
+  },
+  secondaryDisplay: (d) {
+    final cat = d['expense_category']?.toString() ?? '';
+    final catLabel = {
+      'utilities': 'Điện/nước/internet',
+      'supplies': 'Vật tư phụng vụ',
+      'repair': 'Sửa chữa/xây dựng',
+      'salary': 'Lương/thù lao',
+      'liturgy': 'Phụng vụ',
+      'charity': 'Bác ái/từ thiện',
+      'other': 'Chi khác',
+    }[cat] ?? 'Chi';
+    return '${_date(d['date'])} · $catLabel · ${d['donor_name']?.toString().isNotEmpty == true ? d['donor_name'] : '—'}';
+  },
+  sort: '-date',
+  extraFilter: 'type = "expense"',
+  defaults: const {'type': 'expense', 'expense_category': 'other', 'payment_method': 'cash'},
+  fields: const [
+    CrudFieldConfig(name: 'date', label: 'Ngày chi', type: CrudFieldType.date, required: true, section: 'Phiếu chi', flex: 1),
+    CrudFieldConfig(name: 'receipt_no', label: 'Số phiếu', helper: 'Vd: PC-001', section: 'Phiếu chi', flex: 1),
+    CrudFieldConfig(name: 'expense_category', label: 'Hạng mục chi', type: CrudFieldType.select, required: true, section: 'Phiếu chi', options: [
+      (value: 'utilities', label: '💡 Điện/nước/internet'),
+      (value: 'supplies', label: '🕯️ Vật tư phụng vụ'),
+      (value: 'repair', label: '🔧 Sửa chữa/xây dựng'),
+      (value: 'salary', label: '👔 Lương/thù lao'),
+      (value: 'liturgy', label: '⛪ Phụng vụ'),
+      (value: 'charity', label: '❤️ Bác ái/từ thiện'),
+      (value: 'other', label: '📝 Chi khác'),
+    ]),
+    CrudFieldConfig(name: 'amount', label: 'Số tiền (VND)', type: CrudFieldType.number, required: true, section: 'Phiếu chi'),
+    CrudFieldConfig(name: 'payment_method', label: 'Hình thức', type: CrudFieldType.select, section: 'Phiếu chi', options: _paymentMethodOptions),
+
+    CrudFieldConfig(name: 'donor_name', label: 'Người nhận / Nơi chi', helper: 'Vd: Cty Điện lực, Anh Nguyễn Văn A', section: 'Đối tác'),
+    CrudFieldConfig(name: 'description', label: 'Nội dung chi', required: true, helper: 'Vd: Tiền điện T11/2024', section: 'Đối tác'),
+
+    CrudFieldConfig(name: 'notes', label: 'Ghi chú nội bộ', type: CrudFieldType.textarea, section: 'Ghi chú'),
+  ],
+);
+
+// Backward-compat alias — không xoá để code cũ tham chiếu vẫn build được
+final donationConfig = incomeConfig;
