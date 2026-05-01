@@ -49,6 +49,7 @@ const List<RealCmNavDestination> realCmDestinations = [
 
   RealCmNavDestination(route: '/settings', icon: RealCmIcons.settings, label: 'Cấu hình giáo xứ', section: 'Hệ thống', requiredRoles: _priestPastorOnly),
   RealCmNavDestination(route: '/users', icon: RealCmIcons.user, label: 'Quản lý người dùng', section: 'Hệ thống', requiredRoles: _priestPastorOnly),
+  RealCmNavDestination(route: '/activity-log', icon: Icons.history, label: 'Nhật ký hoạt động', section: 'Hệ thống', requiredRoles: _priestPastorOnly),
   RealCmNavDestination(route: '/preferences', icon: Icons.tune, label: 'Tuỳ chọn', section: 'Hệ thống'),
 ];
 
