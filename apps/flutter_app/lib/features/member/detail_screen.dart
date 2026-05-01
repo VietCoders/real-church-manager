@@ -119,9 +119,44 @@ class MemberDetailScreen extends ConsumerWidget {
     final auth = ref.watch(realCmAuthProvider);
     final canEdit = auth.canEditMembers;
     final asyncData = ref.watch(_detailProvider(memberId));
+    final member = asyncData.value?.member;
     return RealCmAppShell(
       title: 'Chi tiết giáo dân',
       actions: [
+        if (canEdit && member != null)
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.add_circle_outline),
+            tooltip: 'Thêm bí tích / phiếu thu',
+            onSelected: (v) async {
+              CollectionConfig? c;
+              if (v == 'baptism') c = cfg.baptismConfig;
+              if (v == 'confirmation') c = cfg.confirmationConfig;
+              if (v == 'anointing') c = cfg.anointingConfig;
+              if (v == 'funeral') c = cfg.funeralConfig;
+              if (v == 'income') c = cfg.incomeConfig;
+              if (c == null) return;
+              final defaults = <String, dynamic>{};
+              if (v == 'income') {
+                defaults['donor_name'] = member.fullName;
+              } else {
+                defaults['member_id'] = member.id;
+              }
+              final ok = await showDialog<bool>(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => CrudFormDialogPublic(config: c!, defaults: defaults),
+              );
+              if (ok == true) ref.invalidate(_detailProvider(memberId));
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'baptism', child: Row(children: [Icon(RealCmIcons.baptism, size: 18, color: RealCmColors.info), SizedBox(width: 8), Text('Sổ Rửa Tội')])),
+              PopupMenuItem(value: 'confirmation', child: Row(children: [Icon(RealCmIcons.confirmation, size: 18, color: RealCmColors.danger), SizedBox(width: 8), Text('Sổ Thêm Sức')])),
+              PopupMenuItem(value: 'anointing', child: Row(children: [Icon(RealCmIcons.anointing, size: 18, color: RealCmColors.warning), SizedBox(width: 8), Text('Sổ Xức Dầu')])),
+              PopupMenuItem(value: 'funeral', child: Row(children: [Icon(RealCmIcons.funeral, size: 18, color: RealCmColors.textMuted), SizedBox(width: 8), Text('Sổ An Táng')])),
+              PopupMenuDivider(),
+              PopupMenuItem(value: 'income', child: Row(children: [Icon(Icons.arrow_circle_up, size: 18, color: RealCmColors.success), SizedBox(width: 8), Text('Phiếu thu / Dâng cúng')])),
+            ],
+          ),
         IconButton(
           icon: const Icon(RealCmIcons.refresh),
           tooltip: 'Làm mới',
