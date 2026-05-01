@@ -4,6 +4,7 @@ import 'package:pocketbase/pocketbase.dart';
 
 import '../../platform/pdf/builder.dart';
 import '../../platform/pocketbase/client.dart';
+import '../../ui/toast/service.dart';
 
 class _ParishInfo {
   const _ParishInfo({required this.name, required this.address});
