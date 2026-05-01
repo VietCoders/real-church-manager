@@ -8,6 +8,7 @@ import '../../design/icons.dart';
 import '../../design/tokens.dart';
 import '../../domain/member/entity.dart';
 import '../../platform/pocketbase/auth.dart';
+import '../../platform/pocketbase/client.dart';
 import '../../ui/modal/service.dart';
 import '../../ui/scaffold/app_shell.dart';
 import '../../ui/toast/service.dart';
