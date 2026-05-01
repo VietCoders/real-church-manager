@@ -237,6 +237,11 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
                           children: [
                             if (m.birthDate != null)
                               _chip(RealCmIcons.calendar, df.format(m.birthDate!)),
+                            if (m.birthDate != null && DateTime.now().month == m.birthDate!.month && DateTime.now().day == m.birthDate!.day)
+                              const Padding(
+                                padding: EdgeInsets.only(left: 4),
+                                child: Text('🎂', style: TextStyle(fontSize: 16)),
+                              ),
                             if (m.phone != null && m.phone!.isNotEmpty)
                               _chip(Icons.phone_outlined, m.phone!),
                             if (m.address != null && m.address!.isNotEmpty)
