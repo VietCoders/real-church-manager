@@ -265,10 +265,17 @@ class _ByAgeReport extends ConsumerWidget {
   const _ByAgeReport();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final repo = ref.read(_statsRepoProvider);
     return _ReportFrame(
       title: 'Phân bổ giáo dân theo độ tuổi',
+      onExport: () async {
+        final m = await repo.membersByAgeGroup();
+        if (!context.mounted) return;
+        await _exportReportPdf(context, 'Giáo dân theo độ tuổi',
+          m.entries.map((e) => MapEntry(e.key, '${e.value}')).toList());
+      },
       child: FutureBuilder(
-        future: ref.read(_statsRepoProvider).membersByAgeGroup(),
+        future: repo.membersByAgeGroup(),
         builder: (ctx, snap) {
           if (!snap.hasData) return const Center(child: CircularProgressIndicator());
           final m = snap.data as Map<String, int>;
