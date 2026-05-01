@@ -6,6 +6,7 @@ import '../../design/icons.dart';
 import '../../design/tokens.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../platform/pocketbase/auth.dart';
+import '../../platform/storage/adapter.dart';
 import '../../ui/toast/service.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
