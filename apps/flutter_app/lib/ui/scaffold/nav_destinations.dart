@@ -8,13 +8,25 @@ class RealCmNavDestination {
     required this.icon,
     required this.label,
     this.section,
+    this.requiredRoles,
   });
 
   final String route;
   final IconData icon;
   final String label;
   final String? section;
+
+  /// Roles được phép thấy item này. null = mọi role authenticated.
+  final List<String>? requiredRoles;
+
+  bool isVisibleFor(String role) {
+    if (requiredRoles == null) return true;
+    return requiredRoles!.contains(role);
+  }
 }
+
+const _priestOnly = ['priest_pastor', 'priest_assistant'];
+const _priestPastorOnly = ['priest_pastor'];
 
 const List<RealCmNavDestination> realCmDestinations = [
   RealCmNavDestination(route: '/', icon: RealCmIcons.home, label: 'Bảng điều khiển'),
@@ -32,10 +44,13 @@ const List<RealCmNavDestination> realCmDestinations = [
   RealCmNavDestination(route: '/groups', icon: RealCmIcons.group, label: 'Đoàn thể', section: 'Mục vụ'),
   RealCmNavDestination(route: '/mass', icon: RealCmIcons.mass, label: 'Lễ ý cầu nguyện', section: 'Mục vụ'),
   RealCmNavDestination(route: '/calendar', icon: RealCmIcons.calendar, label: 'Lịch phụng vụ', section: 'Mục vụ'),
-  RealCmNavDestination(route: '/donations', icon: RealCmIcons.donation, label: 'Sổ thu chi', section: 'Mục vụ'),
+  RealCmNavDestination(route: '/donations', icon: RealCmIcons.donation, label: 'Sổ thu chi', section: 'Mục vụ', requiredRoles: _priestOnly),
   RealCmNavDestination(route: '/reports', icon: RealCmIcons.report, label: 'Báo cáo', section: 'Mục vụ'),
 
-  RealCmNavDestination(route: '/settings', icon: RealCmIcons.settings, label: 'Cấu hình giáo xứ', section: 'Hệ thống'),
-  RealCmNavDestination(route: '/users', icon: RealCmIcons.user, label: 'Quản lý người dùng', section: 'Hệ thống'),
+  RealCmNavDestination(route: '/settings', icon: RealCmIcons.settings, label: 'Cấu hình giáo xứ', section: 'Hệ thống', requiredRoles: _priestPastorOnly),
+  RealCmNavDestination(route: '/users', icon: RealCmIcons.user, label: 'Quản lý người dùng', section: 'Hệ thống', requiredRoles: _priestPastorOnly),
   RealCmNavDestination(route: '/preferences', icon: Icons.tune, label: 'Tuỳ chọn', section: 'Hệ thống'),
 ];
+
+List<RealCmNavDestination> realCmDestinationsFor(String role) =>
+    realCmDestinations.where((d) => d.isVisibleFor(role)).toList();
