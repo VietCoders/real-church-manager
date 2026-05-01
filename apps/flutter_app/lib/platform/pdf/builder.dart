@@ -1,5 +1,5 @@
 // PDF builder — sinh chứng chỉ Bí Tích layout VN chuẩn.
-// Layout: logo giáo xứ + tên giáo xứ + tiêu đề bí tích + thông tin người + cha cử hành + dấu/chữ ký.
+// 5 sổ: Rửa Tội · Thêm Sức · Hôn Phối · Xức Dầu · An Táng.
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -9,26 +9,161 @@ import 'package:intl/intl.dart';
 class RealCmCertificateBuilder {
   RealCmCertificateBuilder._();
 
-  /// Sinh chứng chỉ Rửa Tội. Tham số tối thiểu — extension cho 4 sổ còn lại theo cùng pattern.
+  static final _df = DateFormat('dd/MM/yyyy', 'vi');
+
+  // ─── Rửa Tội ──────────────────────────────────────────────
   static Future<pw.Document> baptism({
     required String parishName,
     required String parishAddress,
-    required String memberSaintName,
+    required Map<String, dynamic> data,
     required String memberFullName,
-    required DateTime memberBirthDate,
-    required String fatherName,
-    required String motherName,
-    required String godfatherName,
-    required String godmotherName,
-    required DateTime baptismDate,
-    required String baptismPlace,
-    required String priestName,
+    required String memberSaintName,
+    DateTime? memberBirthDate,
+  }) async {
+    return _build(
+      parishName: parishName,
+      parishAddress: parishAddress,
+      titleVi: 'CHỨNG CHỈ RỬA TỘI',
+      titleLatin: '(Certificatum Baptismi)',
+      bookNumber: data['book_number']?.toString() ?? '',
+      rows: [
+        ('Tên Thánh', memberSaintName),
+        ('Họ và tên', memberFullName),
+        if (memberBirthDate != null) ('Sinh ngày', _df.format(memberBirthDate)),
+        ('Cha', data['father_name']?.toString() ?? ''),
+        ('Mẹ', data['mother_name']?.toString() ?? ''),
+        _divider,
+        ('Cha đỡ đầu', data['godfather_name']?.toString() ?? ''),
+        ('Mẹ đỡ đầu', data['godmother_name']?.toString() ?? ''),
+        _divider,
+        ('Đã được rửa tội ngày', _date(data['baptism_date'])),
+        ('Tại', data['baptism_place']?.toString() ?? ''),
+        ('Cha cử hành', data['priest_name']?.toString() ?? ''),
+      ],
+    );
+  }
+
+  // ─── Thêm Sức ─────────────────────────────────────────────
+  static Future<pw.Document> confirmation({
+    required String parishName,
+    required String parishAddress,
+    required Map<String, dynamic> data,
+    required String memberFullName,
+  }) async {
+    return _build(
+      parishName: parishName,
+      parishAddress: parishAddress,
+      titleVi: 'CHỨNG CHỈ THÊM SỨC',
+      titleLatin: '(Certificatum Confirmationis)',
+      bookNumber: data['book_number']?.toString() ?? '',
+      rows: [
+        ('Họ và tên', memberFullName),
+        ('Tên Thánh Thêm Sức', data['confirmation_saint_name']?.toString() ?? ''),
+        _divider,
+        ('Người đỡ đầu', data['sponsor_name']?.toString() ?? ''),
+        _divider,
+        ('Đã được Thêm Sức ngày', _date(data['confirmation_date'])),
+        ('Tại', data['confirmation_place']?.toString() ?? ''),
+        ('Đức Giám mục cử hành', data['bishop_name']?.toString() ?? ''),
+      ],
+    );
+  }
+
+  // ─── Hôn Phối ─────────────────────────────────────────────
+  static Future<pw.Document> marriage({
+    required String parishName,
+    required String parishAddress,
+    required Map<String, dynamic> data,
+    required String groomFullName,
+    required String brideFullName,
+  }) async {
+    return _build(
+      parishName: parishName,
+      parishAddress: parishAddress,
+      titleVi: 'CHỨNG CHỈ HÔN PHỐI',
+      titleLatin: '(Certificatum Matrimonii)',
+      bookNumber: data['book_number']?.toString() ?? '',
+      rows: [
+        ('Chú rể', groomFullName),
+        ('Cha chú rể', data['groom_father']?.toString() ?? ''),
+        ('Mẹ chú rể', data['groom_mother']?.toString() ?? ''),
+        _divider,
+        ('Cô dâu', brideFullName),
+        ('Cha cô dâu', data['bride_father']?.toString() ?? ''),
+        ('Mẹ cô dâu', data['bride_mother']?.toString() ?? ''),
+        _divider,
+        ('Người chứng', data['witness_names']?.toString() ?? ''),
+        _divider,
+        ('Đã kết hôn ngày', _date(data['marriage_date'])),
+        ('Tại', data['marriage_place']?.toString() ?? ''),
+        ('Cha cử hành', data['priest_name']?.toString() ?? ''),
+      ],
+    );
+  }
+
+  // ─── Xức Dầu ──────────────────────────────────────────────
+  static Future<pw.Document> anointing({
+    required String parishName,
+    required String parishAddress,
+    required Map<String, dynamic> data,
+    required String memberFullName,
+  }) async {
+    return _build(
+      parishName: parishName,
+      parishAddress: parishAddress,
+      titleVi: 'CHỨNG CHỈ XỨC DẦU BỆNH NHÂN',
+      titleLatin: '(Unctio Infirmorum)',
+      bookNumber: data['book_number']?.toString() ?? '',
+      rows: [
+        ('Họ và tên bệnh nhân', memberFullName),
+        ('Lý do', data['reason']?.toString() ?? ''),
+        _divider,
+        ('Đã được xức dầu ngày', _date(data['anointing_date'])),
+        ('Tại', data['anointing_place']?.toString() ?? ''),
+        ('Cha cử hành', data['priest_name']?.toString() ?? ''),
+      ],
+    );
+  }
+
+  // ─── An Táng ──────────────────────────────────────────────
+  static Future<pw.Document> funeral({
+    required String parishName,
+    required String parishAddress,
+    required Map<String, dynamic> data,
+    required String memberFullName,
+  }) async {
+    return _build(
+      parishName: parishName,
+      parishAddress: parishAddress,
+      titleVi: 'CHỨNG CHỈ AN TÁNG',
+      titleLatin: '(Certificatum Funeris)',
+      bookNumber: data['book_number']?.toString() ?? '',
+      rows: [
+        ('Họ và tên người quá cố', memberFullName),
+        ('Ngày qua đời', _date(data['death_date'])),
+        ('Nguyên nhân', data['death_cause']?.toString() ?? ''),
+        _divider,
+        ('Ngày an táng', _date(data['funeral_date'])),
+        ('Nơi an táng', data['burial_place']?.toString() ?? ''),
+        ('Cha chủ tế', data['priest_name']?.toString() ?? ''),
+      ],
+    );
+  }
+
+  // ─── Helper internal ──────────────────────────────────────
+  static const _divider = ('__divider__', '');
+
+  static Future<pw.Document> _build({
+    required String parishName,
+    required String parishAddress,
+    required String titleVi,
+    required String titleLatin,
     required String bookNumber,
+    required List<(String, String)> rows,
   }) async {
     final pdf = pw.Document();
     final font = await PdfGoogleFonts.notoSerifRegular();
     final fontBold = await PdfGoogleFonts.notoSerifBold();
-    final df = DateFormat('dd/MM/yyyy', 'vi');
 
     pdf.addPage(
       pw.Page(
@@ -43,30 +178,24 @@ class RealCmCertificateBuilder {
                   style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
               pw.Text(parishAddress, style: const pw.TextStyle(fontSize: 11)),
               pw.SizedBox(height: 32),
-              pw.Text('CHỨNG CHỈ RỬA TỘI',
-                  style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-              pw.Text('(Certificatum Baptismi)',
+              pw.Text(titleVi,
+                  style: pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold)),
+              pw.Text(titleLatin,
                   style: pw.TextStyle(fontSize: 11, fontStyle: pw.FontStyle.italic)),
               pw.SizedBox(height: 8),
-              pw.Text('Số sổ: $bookNumber', style: const pw.TextStyle(fontSize: 11)),
+              if (bookNumber.isNotEmpty)
+                pw.Text('Số sổ: $bookNumber', style: const pw.TextStyle(fontSize: 11)),
               pw.SizedBox(height: 24),
               pw.Padding(
                 padding: const pw.EdgeInsets.symmetric(horizontal: 24),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    _row('Tên Thánh:', memberSaintName, fontBold),
-                    _row('Họ và tên:', memberFullName, fontBold),
-                    _row('Sinh ngày:', df.format(memberBirthDate), fontBold),
-                    _row('Cha:', fatherName, fontBold),
-                    _row('Mẹ:', motherName, fontBold),
-                    pw.Divider(),
-                    _row('Cha đỡ đầu:', godfatherName, fontBold),
-                    _row('Mẹ đỡ đầu:', godmotherName, fontBold),
-                    pw.Divider(),
-                    _row('Đã được rửa tội ngày:', df.format(baptismDate), fontBold),
-                    _row('Tại:', baptismPlace, fontBold),
-                    _row('Cha cử hành:', priestName, fontBold),
+                    for (final r in rows)
+                      if (r.$1 == '__divider__')
+                        pw.Divider()
+                      else
+                        _row(r.$1, r.$2, fontBold),
                   ],
                 ),
               ),
@@ -74,24 +203,20 @@ class RealCmCertificateBuilder {
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Column(
-                    children: [
-                      pw.Text('(Dấu giáo xứ)', style: const pw.TextStyle(fontSize: 10)),
-                      pw.SizedBox(height: 64),
-                    ],
-                  ),
-                  pw.Column(
-                    children: [
-                      pw.Text('Cha xứ', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
-                      pw.SizedBox(height: 8),
-                      pw.Text('(Ký và ghi rõ họ tên)', style: pw.TextStyle(fontSize: 9, fontStyle: pw.FontStyle.italic)),
-                      pw.SizedBox(height: 56),
-                    ],
-                  ),
+                  pw.Column(children: [
+                    pw.Text('(Dấu giáo xứ)', style: const pw.TextStyle(fontSize: 10)),
+                    pw.SizedBox(height: 64),
+                  ]),
+                  pw.Column(children: [
+                    pw.Text('Cha xứ', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                    pw.SizedBox(height: 8),
+                    pw.Text('(Ký và ghi rõ họ tên)', style: pw.TextStyle(fontSize: 9, fontStyle: pw.FontStyle.italic)),
+                    pw.SizedBox(height: 56),
+                  ]),
                 ],
               ),
               pw.SizedBox(height: 16),
-              pw.Text('Cấp ngày ${df.format(DateTime.now())}',
+              pw.Text('Cấp ngày ${_df.format(DateTime.now())}',
                   style: pw.TextStyle(fontSize: 10, fontStyle: pw.FontStyle.italic)),
             ],
           ),
@@ -102,6 +227,13 @@ class RealCmCertificateBuilder {
     return pdf;
   }
 
+  static String _date(dynamic v) {
+    if (v == null || v.toString().isEmpty) return '';
+    final d = DateTime.tryParse(v.toString());
+    if (d == null) return v.toString();
+    return _df.format(d);
+  }
+
   static pw.Widget _row(String label, String value, pw.Font bold) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 4),
@@ -109,8 +241,8 @@ class RealCmCertificateBuilder {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.SizedBox(
-            width: 140,
-            child: pw.Text(label, style: const pw.TextStyle(fontSize: 12)),
+            width: 160,
+            child: pw.Text('$label:', style: const pw.TextStyle(fontSize: 12)),
           ),
           pw.Expanded(
             child: pw.Text(value, style: pw.TextStyle(fontSize: 12, font: bold, fontWeight: pw.FontWeight.bold)),
