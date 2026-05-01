@@ -226,6 +226,42 @@ class _ActivityLogScreenState extends ConsumerState<ActivityLogScreen> {
     }
   }
 
+  String _fieldLabel(String f) {
+    return {
+      'full_name': 'Họ tên',
+      'saint_name': 'Tên Thánh',
+      'gender': 'Giới tính',
+      'birth_date': 'Ngày sinh',
+      'phone': 'Điện thoại',
+      'email': 'Email',
+      'address': 'Địa chỉ',
+      'district_id': 'Giáo họ',
+      'family_id': 'Gia đình',
+      'status': 'Trạng thái',
+      'photo': 'Ảnh',
+      'family_name': 'Tên gia đình',
+      'head_id': 'Gia trưởng',
+      'name': 'Tên',
+      'role': 'Vai trò',
+      'priest_name': 'Cha cử hành',
+      'baptism_date': 'Ngày Rửa Tội',
+      'confirmation_date': 'Ngày Thêm Sức',
+      'marriage_date': 'Ngày Hôn Phối',
+      'amount': 'Số tiền',
+      'donor_name': 'Người dâng',
+      'description': 'Mô tả',
+      'notes': 'Ghi chú',
+      'deleted_at': 'Đã xoá',
+    }[f] ?? f;
+  }
+
+  String _fmtVal(dynamic v) {
+    if (v == null || v.toString().isEmpty) return '∅';
+    final s = v.toString();
+    if (s.length > 60) return '${s.substring(0, 60)}…';
+    return s;
+  }
+
   String _collectionLabel(String col) {
     return {
       'members': 'Giáo dân',
