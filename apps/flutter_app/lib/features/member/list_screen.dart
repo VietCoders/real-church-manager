@@ -182,11 +182,11 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(children: [
-                _statusChip(label: 'Tất cả', value: null),
-                _statusChip(label: 'Đang sinh hoạt', value: 'active'),
-                _statusChip(label: 'Đã chuyển', value: 'moved_out'),
-                _statusChip(label: 'Đã qua đời', value: 'deceased'),
-                _statusChip(label: 'Vạ tuyệt thông', value: 'excommunicated'),
+                _statusFilterChip(label: 'Tất cả', value: null),
+                _statusFilterChip(label: 'Đang sinh hoạt', value: 'active'),
+                _statusFilterChip(label: 'Đã chuyển', value: 'moved_out'),
+                _statusFilterChip(label: 'Đã qua đời', value: 'deceased'),
+                _statusFilterChip(label: 'Vạ tuyệt thông', value: 'excommunicated'),
               ]),
             ),
           ),
