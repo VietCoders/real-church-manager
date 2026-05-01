@@ -174,26 +174,36 @@ class PreferencesScreen extends ConsumerWidget {
               _Section(
                 icon: Icons.info_outline,
                 title: 'Về Real Church Manager',
-                children: const [
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text('Phiên bản'),
-                    trailing: Text('1.0.0'),
-                  ),
-                  ListTile(
+                children: [
+                  const _AboutVersionTile(),
+                  const ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text('License'),
                     trailing: Text('MIT'),
                   ),
-                  ListTile(
+                  const ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text('Tác giả'),
                     trailing: Text('Đạo Trần · VietCoders'),
                   ),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text('Repository'),
-                    subtitle: Text('github.com/VietCoders/real-church-manager'),
+                    title: const Text('Repository'),
+                    subtitle: const Text('github.com/VietCoders/real-church-manager'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                      tooltip: 'Mở trên trình duyệt',
+                      onPressed: () async {
+                        const url = 'https://github.com/VietCoders/real-church-manager';
+                        if (await canLaunchUrlString(url)) await launchUrlString(url);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: RealCmSpacing.s2),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.cloud_download_outlined, size: 18),
+                    label: const Text('Kiểm tra cập nhật'),
+                    onPressed: () => _checkUpdate(context),
                   ),
                 ],
               ),
