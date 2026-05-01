@@ -608,20 +608,32 @@ class _MoneyCard extends StatelessWidget {
 // ─── Lễ ý cầu nguyện ──────────────────────────────────────
 class _MassIntentionsReport extends ConsumerWidget {
   const _MassIntentionsReport();
+
+  Future<Map<String, int>> _load() async {
+    final pb = RealCmPocketBase.instance();
+    final r = <String, int>{};
+    for (final s in ['pending', 'scheduled', 'done', 'cancelled']) {
+      final res = await pb.collection('mass_intentions').getList(page: 1, perPage: 1, filter: 'status = "$s"');
+      r[s] = res.totalItems;
+    }
+    return r;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    const labels = {'pending': 'Chờ duyệt', 'scheduled': 'Đã xếp lịch', 'done': 'Đã cử hành', 'cancelled': 'Huỷ'};
     return _ReportFrame(
       title: 'Lễ ý cầu nguyện theo trạng thái',
+      onExport: () async {
+        final m = await _load();
+        if (!context.mounted) return;
+        final total = m.values.fold<int>(0, (s, v) => s + v);
+        final rows = m.entries.map((e) => MapEntry(labels[e.key]!, '${e.value}')).toList()
+          ..add(MapEntry('Tổng', '$total'));
+        await _exportReportPdf(context, 'Lễ ý cầu nguyện', rows);
+      },
       child: FutureBuilder<Map<String, int>>(
-        future: () async {
-          final pb = RealCmPocketBase.instance();
-          final r = <String, int>{};
-          for (final s in ['pending', 'scheduled', 'done', 'cancelled']) {
-            final res = await pb.collection('mass_intentions').getList(page: 1, perPage: 1, filter: 'status = "$s"');
-            r[s] = res.totalItems;
-          }
-          return r;
-        }(),
+        future: _load(),
         builder: (ctx, snap) {
           if (!snap.hasData) return const Center(child: CircularProgressIndicator());
           final m = snap.data!;
