@@ -110,6 +110,14 @@ class DashboardWidgetRegistry {
       defaultSize: DashboardWidgetSize.lg,
       builder: (ref, spec) => UpcomingBirthdaysList(spec: spec),
     ),
+    'list.upcoming_feast_days': DashboardWidgetMeta(
+      type: 'list.upcoming_feast_days',
+      title: 'Bổn mạng sắp tới',
+      description: 'Lễ Thánh bổn mạng trong 30 ngày tới + danh sách giáo dân',
+      icon: RealCmIcons.parish,
+      defaultSize: DashboardWidgetSize.lg,
+      builder: (ref, spec) => UpcomingFeastDaysList(spec: spec),
+    ),
   };
 
   static Map<String, DashboardWidgetMeta> get all => Map.unmodifiable(_registry);
