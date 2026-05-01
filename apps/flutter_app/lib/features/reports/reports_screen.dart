@@ -326,6 +326,12 @@ class _ByAgeReport extends ConsumerWidget {
           m.entries.map((e) => MapEntry(e.key, '${e.value}')).toList(),
           chartType: ReportChartType.bar);
       },
+      onExportExcel: () async {
+        final m = await repo.membersByAgeGroup();
+        if (!context.mounted) return;
+        await _exportReportExcel(context, 'Giáo dân theo độ tuổi',
+          m.entries.map((e) => MapEntry(e.key, '${e.value}')).toList());
+      },
       child: FutureBuilder(
         future: repo.membersByAgeGroup(),
         builder: (ctx, snap) {
