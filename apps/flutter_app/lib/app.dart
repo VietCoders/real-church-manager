@@ -48,6 +48,7 @@ final realCmRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/setup', builder: (_, __) => const ConnectionScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/change-password', builder: (_, __) => const ChangePasswordScreen()),
+      GoRoute(path: '/onboarding', builder: (_, __) => const OnboardingWizardScreen()),
       GoRoute(path: '/', builder: (_, __) => const DashboardScreen()),
 
       GoRoute(path: '/members', builder: (_, __) => const MemberListScreen()),
