@@ -8,9 +8,37 @@ import 'package:pocketbase/pocketbase.dart';
 import '../../data/stats/repository.dart';
 import '../../design/icons.dart';
 import '../../design/tokens.dart';
+import '../../platform/pdf/report_builder.dart';
 import '../../platform/pocketbase/client.dart';
 import '../../ui/scaffold/app_shell.dart';
 import '../../ui/toast/service.dart';
+
+Future<String> _fetchParishName() async {
+  try {
+    final pb = RealCmPocketBase.instance();
+    final res = await pb.collection('parish_settings').getList(page: 1, perPage: 1);
+    if (res.items.isEmpty) return 'Giáo xứ';
+    final d = res.items.first.data;
+    return (d['name'] ?? d['parish_name'] ?? 'Giáo xứ').toString();
+  } catch (_) {
+    return 'Giáo xứ';
+  }
+}
+
+Future<void> _exportReportPdf(BuildContext ctx, String title, List<MapEntry<String, String>> rows, {String? caption}) async {
+  try {
+    final parishName = await _fetchParishName();
+    final doc = await RealCmReportPdfBuilder.simpleTable(
+      parishName: parishName,
+      title: title,
+      caption: caption,
+      rows: rows,
+    );
+    await RealCmReportPdfBuilder.print(doc, jobName: title);
+  } catch (e) {
+    if (ctx.mounted) realCmToast(ctx, 'Lỗi xuất PDF: $e', type: RealCmToastType.error);
+  }
+}
 
 final _statsRepoProvider = Provider((_) => StatsRepository());
 
