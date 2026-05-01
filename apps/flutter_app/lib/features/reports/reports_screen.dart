@@ -50,6 +50,28 @@ Future<void> _exportReportPdf(
   }
 }
 
+Future<void> _exportReportExcel(
+  BuildContext ctx,
+  String title,
+  List<MapEntry<String, String>> rows, {
+  String? caption,
+}) async {
+  try {
+    final parishName = await _fetchParishName();
+    final path = await RealCmExcelExporter.exportSimpleTable(
+      parishName: parishName,
+      title: title,
+      caption: caption,
+      rows: rows,
+    );
+    if (!ctx.mounted) return;
+    realCmToast(ctx, 'Đã xuất: $path', type: RealCmToastType.success);
+    await OpenFilex.open(path);
+  } catch (e) {
+    if (ctx.mounted) realCmToast(ctx, 'Lỗi xuất Excel: $e', type: RealCmToastType.error);
+  }
+}
+
 final _statsRepoProvider = Provider((_) => StatsRepository());
 
 class ReportsScreen extends ConsumerStatefulWidget {
