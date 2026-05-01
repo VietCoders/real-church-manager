@@ -104,7 +104,8 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
     final canEdit = auth.canEditMembers;
     final query = _MemberListQuery(
       search: _search.isEmpty ? null : _search,
-      status: _statusFilter,
+      status: _showDeleted ? null : _statusFilter,
+      showDeleted: _showDeleted,
     );
     final asyncList = ref.watch(_memberListProvider(query));
     final df = DateFormat('dd/MM/yyyy', 'vi');
