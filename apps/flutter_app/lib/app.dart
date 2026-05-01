@@ -57,6 +57,7 @@ final realCmRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/reports', builder: (_, __) => const ReportsScreen()),
 
       GoRoute(path: '/families', builder: (_, __) => CollectionCrudScreen(config: cfg.familyConfig)),
+      GoRoute(path: '/families/:id', builder: (_, state) => FamilyDetailScreen(familyId: state.pathParameters['id']!)),
       GoRoute(path: '/sacrament/baptism', builder: (_, __) => CollectionCrudScreen(config: cfg.baptismConfig)),
       GoRoute(path: '/sacrament/confirmation', builder: (_, __) => CollectionCrudScreen(config: cfg.confirmationConfig)),
       GoRoute(path: '/sacrament/marriage', builder: (_, __) => CollectionCrudScreen(config: cfg.marriageConfig)),
