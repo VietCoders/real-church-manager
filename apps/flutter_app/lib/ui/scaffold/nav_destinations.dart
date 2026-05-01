@@ -36,4 +36,6 @@ const List<RealCmNavDestination> realCmDestinations = [
   RealCmNavDestination(route: '/reports', icon: RealCmIcons.report, label: 'Báo cáo', section: 'Mục vụ'),
 
   RealCmNavDestination(route: '/settings', icon: RealCmIcons.settings, label: 'Cấu hình giáo xứ', section: 'Hệ thống'),
+  RealCmNavDestination(route: '/users', icon: RealCmIcons.user, label: 'Quản lý người dùng', section: 'Hệ thống'),
+  RealCmNavDestination(route: '/preferences', icon: Icons.tune, label: 'Tuỳ chọn', section: 'Hệ thống'),
 ];
