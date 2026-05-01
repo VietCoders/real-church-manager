@@ -135,6 +135,7 @@ class DashboardWidgetRegistry {
         const DashboardWidgetSpec(type: 'stats.funeral_year', order: 6, size: DashboardWidgetSize.sm, enabled: false),
         const DashboardWidgetSpec(type: 'list.recent_baptisms', order: 7, size: DashboardWidgetSize.lg),
         const DashboardWidgetSpec(type: 'list.upcoming_birthdays', order: 8, size: DashboardWidgetSize.lg),
+        const DashboardWidgetSpec(type: 'list.upcoming_feast_days', order: 9, size: DashboardWidgetSize.lg),
       ];
 
   /// Merge layout đã save với registry hiện tại — thêm widget mới (chưa có trong save) ở cuối.
