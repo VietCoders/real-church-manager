@@ -91,6 +91,7 @@ final marriageConfig = CollectionConfig(
   primaryDisplay: (d) => d['book_number']?.toString().isNotEmpty == true ? 'Số sổ ${d['book_number']}' : 'Hôn Phối (chưa có số sổ)',
   secondaryDisplay: (d) => '${_date(d['marriage_date'])} · Cha: ${d['priest_name'] ?? ''}',
   sort: '-marriage_date',
+  onPrintCertificate: printMarriageCertificate,
   fields: const [
     CrudFieldConfig(name: 'book_number', label: 'Số sổ', section: 'Thông tin chung', helper: 'HP-YYYY-NNNN', flex: 1),
     CrudFieldConfig(name: 'marriage_date', label: 'Ngày Hôn Phối', type: CrudFieldType.date, required: true, section: 'Thông tin chung', flex: 1),
