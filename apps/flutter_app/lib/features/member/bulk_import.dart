@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/member/repository.dart';
+import 'member_form.dart' show memberRepoProvider;
 import '../../design/icons.dart';
 import '../../design/tokens.dart';
 import '../../platform/pocketbase/auth.dart';
