@@ -152,6 +152,7 @@ final funeralConfig = CollectionConfig(
   primaryDisplay: (d) => d['book_number']?.toString().isNotEmpty == true ? 'Số sổ ${d['book_number']}' : 'An Táng (chưa có số sổ)',
   secondaryDisplay: (d) => 'Mất: ${_date(d['death_date'])} · An táng: ${_date(d['funeral_date'])}',
   sort: '-funeral_date',
+  onPrintCertificate: printFuneralCertificate,
   fields: const [
     CrudFieldConfig(name: 'book_number', label: 'Số sổ', section: 'Thông tin chung', helper: 'AT-YYYY-NNNN', flex: 1),
     CrudFieldConfig(name: 'priest_name', label: 'Cha cử hành', required: true, section: 'Thông tin chung', flex: 1),
