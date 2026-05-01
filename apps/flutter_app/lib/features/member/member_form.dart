@@ -1,12 +1,17 @@
 // Member form — modal đầy đủ thêm/sửa giáo dân.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/member/repository.dart';
 import '../../design/icons.dart';
 import '../../design/tokens.dart';
 import '../../domain/member/entity.dart';
+import '../../platform/pocketbase/client.dart';
+import '../../ui/modal/service.dart';
 import '../../ui/toast/service.dart';
 
 final memberRepoProvider = Provider((_) => MemberRepository());
