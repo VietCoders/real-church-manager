@@ -252,10 +252,14 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
                               onSelected: (v) {
                                 if (v == 'edit') _edit(m);
                                 if (v == 'delete') _delete(m);
+                                if (v == 'restore') _restore(m);
                               },
-                              itemBuilder: (_) => const [
-                                PopupMenuItem(value: 'edit', child: Row(children: [Icon(RealCmIcons.edit, size: 18), SizedBox(width: 8), Text('Sửa')])),
-                                PopupMenuItem(value: 'delete', child: Row(children: [Icon(RealCmIcons.delete, size: 18, color: RealCmColors.danger), SizedBox(width: 8), Text('Xoá', style: TextStyle(color: RealCmColors.danger))])),
+                              itemBuilder: (_) => [
+                                if (!_showDeleted)
+                                  const PopupMenuItem(value: 'edit', child: Row(children: [Icon(RealCmIcons.edit, size: 18), SizedBox(width: 8), Text('Sửa')])),
+                                if (_showDeleted)
+                                  const PopupMenuItem(value: 'restore', child: Row(children: [Icon(Icons.restore, size: 18, color: RealCmColors.success), SizedBox(width: 8), Text('Khôi phục', style: TextStyle(color: RealCmColors.success))])),
+                                const PopupMenuItem(value: 'delete', child: Row(children: [Icon(RealCmIcons.delete, size: 18, color: RealCmColors.danger), SizedBox(width: 8), Text('Xoá', style: TextStyle(color: RealCmColors.danger))])),
                               ],
                             )
                           : null,
