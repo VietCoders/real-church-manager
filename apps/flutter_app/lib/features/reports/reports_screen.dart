@@ -159,24 +159,26 @@ class _ReportItem extends ConsumerWidget {
 }
 
 // ─── Tổng quan ────────────────────────────────────────────
-class _OverviewReport extends ConsumerStatefulWidget {
+class _OverviewReport extends ConsumerWidget {
   const _OverviewReport();
-  @override
-  ConsumerState<_OverviewReport> createState() => _OverviewReportState();
-}
-
-class _OverviewReportState extends ConsumerState<_OverviewReport> {
-  List<int>? _data;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.read(_statsRepoProvider);
     final yr = DateTime.now().year;
     return _ReportFrame(
       title: 'Tổng quan giáo xứ',
-      onExport: _data == null ? null : () {
-        final d = _data!;
-        _exportReportPdf(context, 'Tổng quan giáo xứ', [
+      onExport: () async {
+        final d = await Future.wait([
+          repo.totalActiveMembers(),
+          repo.totalFamilies(),
+          repo.totalDistricts(),
+          repo.baptismsThisYear(),
+          repo.marriagesThisYear(),
+          repo.funeralsThisYear(),
+        ]);
+        if (!context.mounted) return;
+        await _exportReportPdf(context, 'Tổng quan giáo xứ', [
           MapEntry('Giáo dân', '${d[0]}'),
           MapEntry('Gia đình', '${d[1]}'),
           MapEntry('Giáo họ', '${d[2]}'),
@@ -197,11 +199,6 @@ class _OverviewReportState extends ConsumerState<_OverviewReport> {
         builder: (ctx, snap) {
           if (!snap.hasData) return const Center(child: CircularProgressIndicator());
           final d = snap.data as List<int>;
-          if (_data == null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) setState(() => _data = d);
-            });
-          }
           return GridView.count(
             crossAxisCount: 3,
             childAspectRatio: 1.6,
