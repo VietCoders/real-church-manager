@@ -51,25 +51,46 @@ DateTime? _parseDate(dynamic v) {
   return DateTime.tryParse(v.toString());
 }
 
+bool _validate(BuildContext ctx, Map<String, dynamic> data, List<String> requiredFields) {
+  final missing = <String>[];
+  for (final f in requiredFields) {
+    final v = data[f];
+    if (v == null || v.toString().trim().isEmpty) missing.add(f);
+  }
+  if (missing.isEmpty) return true;
+  realCmToast(ctx, 'Thiếu dữ liệu bắt buộc: ${missing.join(", ")}', type: RealCmToastType.error);
+  return false;
+}
+
 // ─── Public printers ──────────────────────────────────────
 
 Future<void> printBaptismCertificate(BuildContext ctx, RecordModel rec) async {
+  if (!_validate(ctx, rec.data, ['member_id', 'baptism_date', 'priest_name'])) return;
   final parish = await _fetchParish();
   final member = await _fetchMember(rec.data['member_id']?.toString());
+  if (member == null) {
+    if (ctx.mounted) realCmToast(ctx, 'Không tìm thấy giáo dân tương ứng', type: RealCmToastType.error);
+    return;
+  }
   final doc = await RealCmCertificateBuilder.baptism(
     parishName: parish.name,
     parishAddress: parish.address,
     data: rec.data,
-    memberFullName: (member?.data['full_name'] ?? '').toString(),
-    memberSaintName: (member?.data['saint_name'] ?? '').toString(),
-    memberBirthDate: _parseDate(member?.data['birth_date']),
+    memberFullName: (member.data['full_name'] ?? '').toString(),
+    memberSaintName: (member.data['saint_name'] ?? '').toString(),
+    memberBirthDate: _parseDate(member.data['birth_date']),
   );
   await RealCmCertificateBuilder.printDocument(doc, jobName: 'Chứng chỉ Rửa Tội');
 }
 
 Future<void> printConfirmationCertificate(BuildContext ctx, RecordModel rec) async {
+  if (!_validate(ctx, rec.data, ['member_id', 'confirmation_date', 'bishop_name'])) return;
   final parish = await _fetchParish();
   final member = await _fetchMember(rec.data['member_id']?.toString());
+  if (member == null) {
+    if (ctx.mounted) realCmToast(ctx, 'Không tìm thấy giáo dân tương ứng', type: RealCmToastType.error);
+    return;
+  }
   final doc = await RealCmCertificateBuilder.confirmation(
     parishName: parish.name,
     parishAddress: parish.address,
@@ -80,9 +101,14 @@ Future<void> printConfirmationCertificate(BuildContext ctx, RecordModel rec) asy
 }
 
 Future<void> printMarriageCertificate(BuildContext ctx, RecordModel rec) async {
+  if (!_validate(ctx, rec.data, ['groom_id', 'bride_id', 'marriage_date', 'priest_name'])) return;
   final parish = await _fetchParish();
   final groom = await _fetchMember(rec.data['groom_id']?.toString());
   final bride = await _fetchMember(rec.data['bride_id']?.toString());
+  if (groom == null || bride == null) {
+    if (ctx.mounted) realCmToast(ctx, 'Không tìm thấy chú rể hoặc cô dâu', type: RealCmToastType.error);
+    return;
+  }
   final doc = await RealCmCertificateBuilder.marriage(
     parishName: parish.name,
     parishAddress: parish.address,
@@ -94,8 +120,13 @@ Future<void> printMarriageCertificate(BuildContext ctx, RecordModel rec) async {
 }
 
 Future<void> printAnointingCertificate(BuildContext ctx, RecordModel rec) async {
+  if (!_validate(ctx, rec.data, ['member_id', 'anointing_date', 'priest_name'])) return;
   final parish = await _fetchParish();
   final member = await _fetchMember(rec.data['member_id']?.toString());
+  if (member == null) {
+    if (ctx.mounted) realCmToast(ctx, 'Không tìm thấy giáo dân tương ứng', type: RealCmToastType.error);
+    return;
+  }
   final doc = await RealCmCertificateBuilder.anointing(
     parishName: parish.name,
     parishAddress: parish.address,
@@ -106,8 +137,13 @@ Future<void> printAnointingCertificate(BuildContext ctx, RecordModel rec) async 
 }
 
 Future<void> printFuneralCertificate(BuildContext ctx, RecordModel rec) async {
+  if (!_validate(ctx, rec.data, ['member_id', 'death_date', 'funeral_date', 'priest_name'])) return;
   final parish = await _fetchParish();
   final member = await _fetchMember(rec.data['member_id']?.toString());
+  if (member == null) {
+    if (ctx.mounted) realCmToast(ctx, 'Không tìm thấy giáo dân tương ứng', type: RealCmToastType.error);
+    return;
+  }
   final doc = await RealCmCertificateBuilder.funeral(
     parishName: parish.name,
     parishAddress: parish.address,
