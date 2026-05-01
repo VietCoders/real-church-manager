@@ -344,7 +344,7 @@ class _ByGenderReport extends ConsumerWidget {
           MapEntry('Nữ', '${m['female']??0}'),
           MapEntry('Khác', '${m['other']??0}'),
           MapEntry('Tổng', '$total'),
-        ]);
+        ], chartType: ReportChartType.pie);
       },
       child: FutureBuilder(
         future: repo.membersByGender(),
