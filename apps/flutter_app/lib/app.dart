@@ -70,7 +70,9 @@ final realCmRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/sacrament/funeral', builder: (_, __) => CollectionCrudScreen(config: cfg.funeralConfig)),
       GoRoute(path: '/groups', builder: (_, __) => CollectionCrudScreen(config: cfg.groupConfig)),
       GoRoute(path: '/mass', builder: (_, __) => CollectionCrudScreen(config: cfg.massIntentionConfig)),
-      GoRoute(path: '/donations', builder: (_, __) => CollectionCrudScreen(config: cfg.donationConfig)),
+      GoRoute(path: '/income', builder: (_, __) => CollectionCrudScreen(config: cfg.incomeConfig)),
+      GoRoute(path: '/expense', builder: (_, __) => CollectionCrudScreen(config: cfg.expenseConfig)),
+      GoRoute(path: '/donations', builder: (_, __) => CollectionCrudScreen(config: cfg.incomeConfig)), // legacy redirect
     ],
   );
 });
