@@ -552,7 +552,7 @@ class _DonationSummaryReportState extends ConsumerState<_DonationSummaryReport> 
           ..add(MapEntry('Tổng thu', '${fmt.format(totalIn)} đ'))
           ..add(MapEntry('Tổng chi', '${fmt.format(totalOut)} đ'))
           ..add(MapEntry('Số dư', '${fmt.format(totalIn - totalOut)} đ'));
-        await _exportReportPdf(context, 'Tổng thu chi', rows, caption: 'Năm $_year');
+        await _exportReportPdf(context, 'Tổng thu chi', rows, caption: 'Năm $_year', chartType: ReportChartType.pie);
       },
       child: FutureBuilder<Map<String, num>>(
         future: _future,
