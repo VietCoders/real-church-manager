@@ -291,6 +291,7 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
                               onSelected: (v) async {
                                 if (v == 'edit') _showForm(existing: r);
                                 if (v == 'delete') _delete(r);
+                                if (v == 'restore') _restore(r);
                                 if (v == 'print') {
                                   try {
                                     await cfg.onPrintCertificate!(context, r);
@@ -300,9 +301,11 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
                                 }
                               },
                               itemBuilder: (_) => [
-                                if (cfg.onPrintCertificate != null)
+                                if (cfg.onPrintCertificate != null && !_showDeleted)
                                   const PopupMenuItem(value: 'print', child: Row(children: [Icon(Icons.print, size: 18), SizedBox(width: 8), Text('In chứng chỉ')])),
-                                if (canEdit) const PopupMenuItem(value: 'edit', child: Text('Sửa')),
+                                if (canEdit && !_showDeleted) const PopupMenuItem(value: 'edit', child: Text('Sửa')),
+                                if (canEdit && _showDeleted)
+                                  const PopupMenuItem(value: 'restore', child: Row(children: [Icon(Icons.restore, size: 18, color: RealCmColors.success), SizedBox(width: 8), Text('Khôi phục', style: TextStyle(color: RealCmColors.success))])),
                                 if (canEdit) const PopupMenuItem(value: 'delete', child: Text('Xoá', style: TextStyle(color: RealCmColors.danger))),
                               ],
                             )
