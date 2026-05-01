@@ -11,10 +11,12 @@ import 'features/coming_soon/coming_soon_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/district/list_screen.dart';
 import 'features/member/list_screen.dart';
+import 'features/modules/configs.dart' as cfg;
 import 'features/settings/connection_screen.dart';
 import 'features/settings/parish_settings_screen.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'platform/pocketbase/auth.dart';
+import 'ui/crud/collection_crud.dart';
 
 final realCmRouterProvider = Provider<GoRouter>((ref) {
   final auth = ref.watch(realCmAuthProvider);
@@ -25,7 +27,6 @@ final realCmRouterProvider = Provider<GoRouter>((ref) {
       final connecting = loc == '/setup';
       final loggingIn = loc == '/login';
       final changing = loc == '/change-password';
-
       if (!auth.hasBackend) return connecting ? null : '/setup';
       if (!auth.isAuthenticated) return loggingIn ? null : '/login';
       if (auth.mustChangePassword) return changing ? null : '/change-password';
@@ -38,43 +39,32 @@ final realCmRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/change-password', builder: (_, __) => const ChangePasswordScreen()),
       GoRoute(path: '/', builder: (_, __) => const DashboardScreen()),
 
-      // Module đã có full CRUD
+      // Module có CRUD UI riêng
       GoRoute(path: '/members', builder: (_, __) => const MemberListScreen()),
       GoRoute(path: '/districts', builder: (_, __) => const DistrictListScreen()),
       GoRoute(path: '/settings', builder: (_, __) => const ParishSettingsScreen()),
 
-      // Module placeholder — full UI sẽ scaffold trong các turn tiếp.
+      // Module dùng generic CollectionCrudScreen với config
+      GoRoute(path: '/sacrament/baptism', builder: (_, __) => CollectionCrudScreen(config: cfg.baptismConfig)),
+      GoRoute(path: '/sacrament/confirmation', builder: (_, __) => CollectionCrudScreen(config: cfg.confirmationConfig)),
+      GoRoute(path: '/sacrament/marriage', builder: (_, __) => CollectionCrudScreen(config: cfg.marriageConfig)),
+      GoRoute(path: '/sacrament/anointing', builder: (_, __) => CollectionCrudScreen(config: cfg.anointingConfig)),
+      GoRoute(path: '/sacrament/funeral', builder: (_, __) => CollectionCrudScreen(config: cfg.funeralConfig)),
+      GoRoute(path: '/groups', builder: (_, __) => CollectionCrudScreen(config: cfg.groupConfig)),
+      GoRoute(path: '/mass', builder: (_, __) => CollectionCrudScreen(config: cfg.massIntentionConfig)),
+      GoRoute(path: '/donations', builder: (_, __) => CollectionCrudScreen(config: cfg.donationConfig)),
+
+      // Module còn placeholder (Family / Calendar / Reports — sẽ làm v1.0.x)
       GoRoute(path: '/families', builder: (_, __) => _placeholder('/families')),
-      GoRoute(path: '/sacrament/baptism', builder: (_, __) => _placeholder('/sacrament/baptism', custom: const ComingSoonConfig(
-        title: 'Sổ Rửa Tội',
-        icon: RealCmIcons.baptism,
-        heading: 'Sổ Rửa Tội (Baptism)',
-        description: 'Quản lý sổ Bí Tích Rửa Tội với cha mẹ đỡ đầu, cha rửa tội, in chứng chỉ.',
-        features: [
-          'CRUD record Rửa Tội với số sổ tự động (RT-YYYY-NNNN)',
-          'Liên kết giáo dân + cha mẹ đỡ đầu',
-          'Tự động cập nhật Member.baptism_date',
-          'In chứng chỉ Rửa Tội PDF A4 layout chuẩn VN (đã có pdf builder canonical)',
-          'Tìm kiếm theo số sổ, năm, tên người',
-          'Backend: data layer đã có entity + repository sẵn sàng',
-        ],
-      ))),
-      GoRoute(path: '/sacrament/confirmation', builder: (_, __) => _placeholder('/sacrament/confirmation')),
-      GoRoute(path: '/sacrament/marriage', builder: (_, __) => _placeholder('/sacrament/marriage')),
-      GoRoute(path: '/sacrament/anointing', builder: (_, __) => _placeholder('/sacrament/anointing')),
-      GoRoute(path: '/sacrament/funeral', builder: (_, __) => _placeholder('/sacrament/funeral')),
-      GoRoute(path: '/groups', builder: (_, __) => _placeholder('/groups')),
-      GoRoute(path: '/mass', builder: (_, __) => _placeholder('/mass')),
       GoRoute(path: '/calendar', builder: (_, __) => _placeholder('/calendar')),
-      GoRoute(path: '/donations', builder: (_, __) => _placeholder('/donations')),
       GoRoute(path: '/reports', builder: (_, __) => _placeholder('/reports')),
     ],
   );
 });
 
-Widget _placeholder(String route, {ComingSoonConfig? custom}) {
-  final cfg = custom ?? ComingSoonCatalog.all[route];
-  if (cfg == null) {
+Widget _placeholder(String route) {
+  final c = ComingSoonCatalog.all[route];
+  if (c == null) {
     return ComingSoonScreen(
       appBarTitle: 'Đang phát triển',
       icon: RealCmIcons.info,
@@ -84,12 +74,12 @@ Widget _placeholder(String route, {ComingSoonConfig? custom}) {
     );
   }
   return ComingSoonScreen(
-    appBarTitle: cfg.title,
-    icon: cfg.icon,
-    heading: cfg.heading,
-    description: cfg.description,
-    features: cfg.features,
-    targetVersion: cfg.targetVersion,
+    appBarTitle: c.title,
+    icon: c.icon,
+    heading: c.heading,
+    description: c.description,
+    features: c.features,
+    targetVersion: c.targetVersion,
   );
 }
 
