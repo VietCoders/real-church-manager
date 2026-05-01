@@ -60,6 +60,7 @@ class CollectionConfig {
     this.softDelete = false,
     this.iconColor,
     this.onPrintCertificate,
+    this.detailRoutePrefix,
   });
 
   /// Tên collection PocketBase.
