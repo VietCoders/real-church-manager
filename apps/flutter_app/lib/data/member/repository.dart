@@ -24,10 +24,11 @@ class MemberRepository {
     String? search,
     String? districtId,
     String? status,
+    bool showDeleted = false,
     String? sort = '-updated',
   }) async {
     final pb = RealCmPocketBase.instance();
-    final filters = <String>['deleted_at = null'];
+    final filters = <String>[showDeleted ? 'deleted_at != null' : 'deleted_at = null'];
     if (districtId != null && districtId.isNotEmpty) {
       filters.add('district_id = "$districtId"');
     }
