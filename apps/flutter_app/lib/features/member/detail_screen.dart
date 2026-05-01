@@ -281,6 +281,18 @@ class _DetailBody extends StatelessWidget {
     );
   }
 
+  int _calcAge(DateTime birth) {
+    final now = DateTime.now();
+    var age = now.year - birth.year;
+    if (now.month < birth.month || (now.month == birth.month && now.day < birth.day)) age--;
+    return age;
+  }
+
+  bool _isBirthdayToday(DateTime birth) {
+    final now = DateTime.now();
+    return now.month == birth.month && now.day == birth.day;
+  }
+
   Widget _badge(String text, Color color) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
