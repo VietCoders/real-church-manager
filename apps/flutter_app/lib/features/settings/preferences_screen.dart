@@ -294,7 +294,7 @@ class PreferencesScreen extends ConsumerWidget {
       final pb = RealCmPocketBase.instance();
       // PB cần admin token cho file token
       final token = await pb.files.getToken();
-      final url = pb.backups.getDownloadURL(token, key);
+      final url = pb.backups.getDownloadURL(token, key).toString();
       if (await canLaunchUrlString(url)) {
         await launchUrlString(url);
         if (context.mounted) realCmToast(context, 'Mở link tải về trên trình duyệt', type: RealCmToastType.info);
