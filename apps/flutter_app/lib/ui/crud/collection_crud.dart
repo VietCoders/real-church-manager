@@ -218,31 +218,52 @@ class _CollectionCrudScreenState extends ConsumerState<CollectionCrudScreen> {
             ),
           ),
           Expanded(
-            child: FutureBuilder<List<RecordModel>>(
-              future: _future,
-              builder: (ctx, snap) {
-                if (snap.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snap.hasError) return CrudErrorState(error: snap.error!, onRetry: _refresh);
-                final items = snap.data ?? [];
-                if (items.isEmpty) {
-                  return CrudEmptyState(
-                    icon: cfg.icon,
-                    title: 'Chưa có ${cfg.itemSingular} nào',
-                    hint: 'Thêm mới để bắt đầu.',
-                    canAdd: canEdit && _search.isEmpty,
-                    addLabel: 'Thêm ${cfg.itemSingular}',
-                    onAdd: () => _showForm(),
-                    isSearching: _search.isNotEmpty,
-                  );
-                }
-                return ListView.separated(
+            child: Builder(builder: (ctx) {
+              if (_loading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (_error != null) {
+                return CrudErrorState(error: _error!, onRetry: _refresh);
+              }
+              if (_items.isEmpty) {
+                return CrudEmptyState(
+                  icon: cfg.icon,
+                  title: 'Chưa có ${cfg.itemSingular} nào',
+                  hint: 'Thêm mới để bắt đầu.',
+                  canAdd: canEdit && _search.isEmpty,
+                  addLabel: 'Thêm ${cfg.itemSingular}',
+                  onAdd: () => _showForm(),
+                  isSearching: _search.isNotEmpty,
+                );
+              }
+              final hasMore = _page < _totalPages;
+              return NotificationListener<ScrollNotification>(
+                onNotification: (n) {
+                  if (n is ScrollEndNotification && n.metrics.extentAfter < 200 && hasMore) {
+                    _loadMore();
+                  }
+                  return false;
+                },
+                child: ListView.separated(
                   padding: const EdgeInsets.symmetric(vertical: RealCmSpacing.s2),
-                  itemCount: items.length,
+                  itemCount: _items.length + (hasMore ? 1 : 0),
                   separatorBuilder: (_, __) => const Divider(height: 1, indent: 72),
                   itemBuilder: (_, i) {
-                    final r = items[i];
+                    if (i >= _items.length) {
+                      return Padding(
+                        padding: const EdgeInsets.all(RealCmSpacing.s4),
+                        child: Center(
+                          child: _loadingMore
+                              ? const CircularProgressIndicator()
+                              : TextButton.icon(
+                                  icon: const Icon(Icons.expand_more),
+                                  label: Text('Tải thêm (${_items.length}/${_totalPages * _perPage})'),
+                                  onPressed: _loadMore,
+                                ),
+                        ),
+                      );
+                    }
+                    final r = _items[i];
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: RealCmSpacing.s4, vertical: RealCmSpacing.s2),
                       leading: CircleAvatar(
